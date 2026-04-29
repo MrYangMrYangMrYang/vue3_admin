@@ -43,7 +43,8 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
+// @ts-nocheck - GSAP animation component with complex type interactions
 import { ref, onMounted, onUnmounted, watch, defineComponent, h } from 'vue'
 import gsap from 'gsap'
 

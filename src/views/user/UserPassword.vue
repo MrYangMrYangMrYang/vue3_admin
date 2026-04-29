@@ -1,24 +1,23 @@
-<script setup>
+<script setup lang="ts">
 /**
  * 修改密码页面
  * 提供原密码校验、新密码与原密码差异校验以及确认密码一致性校验
  */
 import { ref } from 'vue'
 import { userUpdatePasswordService } from '@/api/user'
+import { UpdatePasswordData } from '@/types'
 import { useUserStore } from '@/stores'
+import type { UserInfo } from '@/types'
 import { useRouter } from 'vue-router'
 
-const form = ref() // 获取表单实例
-const pwdForm = ref({
-  old_pwd: '', // 原密码
-  new_pwd: '', // 新密码
-  re_pwd: '' // 确认密码
+const form = ref()
+const pwdForm = ref<UpdatePasswordData>({
+  old_pwd: '',
+  new_pwd: '',
+  re_pwd: ''
 })
 
-/**
- * 自定义校验规则：校验新密码不能与原密码相同
- */
-const checkDifferent = (_rule, value, callback) => {
+const checkDifferent = (_rule: any, value: string, callback: Function) => {
   if (value === pwdForm.value.old_pwd) {
     callback(new Error('新密码不能与原密码一样'))
   } else {
@@ -26,10 +25,7 @@ const checkDifferent = (_rule, value, callback) => {
   }
 }
 
-/**
- * 自定义校验规则：校验确认密码必须与新密码一致
- */
-const checkSameAsNewPwd = (_rule, value, callback) => {
+const checkSameAsNewPwd = (_rule: any, value: string, callback: Function) => {
   if (value !== pwdForm.value.new_pwd) {
     callback(new Error('确认密码必须和新密码一样'))
   } else {
@@ -76,7 +72,7 @@ const submitForm = async () => {
     ElMessage.success({ message: '密码修改成功', duration: 1500 })
     // 修改成功后，清除 token 和用户信息并跳转至登录页重新登录
     userStore.setToken('')
-    userStore.setUser({})
+    userStore.setUser({} as UserInfo)
     router.push('/login')
   } catch {
     // 校验失败或接口报错

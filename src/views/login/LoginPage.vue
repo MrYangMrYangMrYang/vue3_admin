@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 /**
  * 登录与注册页面组件
  * 包含：
@@ -7,15 +7,15 @@
  * 3. 记住我功能（使用 localStorage）
  * 4. 动态背景与人物交互动画
  */
-import { userRegisterService, userLoginService } from '@/api/user.js'
+import { userRegisterService, userLoginService } from '@/api/user'
+import { RegisterData, LoginData } from '@/types'
 import { User, Lock, View, Hide } from '@element-plus/icons-vue'
-import { ref, watch, computed, onMounted } from 'vue'
+import { ref, watch, computed, onMounted, nextTick } from 'vue'
 import { useUserStore } from '@/stores'
 import { useRouter } from 'vue-router'
 import AnimatedCharacters from '@/components/AnimatedCharacters.vue'
 
-// --- 数据定义 ---
-const formModel = ref({ username: '', password: '', repassword: '' })
+const formModel = ref<RegisterData & LoginData>({ username: '', password: '', repassword: '' })
 const rememberMe = ref(false) // 记住我复选框状态
 
 // 动画状态控制
@@ -62,7 +62,7 @@ const rules = {
     },
     {
       // 自定义校验器：匹配两次输入密码是否一致
-      validator: (rule, value, callback) => {
+      validator: (_rule: any, value: string, callback: Function) => {
         if (value !== formModel.value.password) {
           callback(new Error('两次输入密码不一致'))
         } else {
@@ -109,8 +109,18 @@ const login = async () => {
     loading.value = true
     const res = await userLoginService(formModel.value)
 
-    // 存储 Token 到 Pinia
-    userStore.setToken(res.data.token)
+    // 安全提取 Token - 兼容多种后端响应格式（使用类型断言避免 TS 报错）
+    const responseData = res.data as Record<string, any>
+    const innerData = (responseData.data || {}) as Record<string, any>
+
+    // 优先使用 res.data.data.token，否则尝试 res.data.token（兼容不同后端格式）
+    const token = (innerData.token || responseData.token) as string
+
+    if (!token) {
+      throw new Error('登录响应中未获取到 Token')
+    }
+
+    userStore.setToken(token)
 
     // 处理“记住我”本地存储逻辑
     if (rememberMe.value) {
@@ -120,9 +130,14 @@ const login = async () => {
     }
 
     ElMessage.success('登录成功')
-    router.push('/') // 跳转到后台主页
-  } catch {
-    // 登录失败处理
+
+    // 使用 nextTick 确保 Token 持久化后再跳转
+    await nextTick()
+    router.push('/article/channel') // 跳转到文章分类页（有数据的主页面）
+  } catch (error: unknown) {
+    // 登录失败处理 - 显示具体错误信息
+    const message = error instanceof Error ? error.message : '登录失败，请重试'
+    ElMessage.error(message)
   } finally {
     loading.value = false
   }
@@ -213,7 +228,7 @@ const onPasswordFocus = () => {
 
         <div class="formHeader">
           <transition name="fade-slide" mode="out-in">
-            <div :key="isRegister">
+            <div :key="isRegister ? 'register' : 'login'">
               <h1 class="formTitle">
                 {{ isRegister ? '创建新账号' : '登录到工作台' }}
               </h1>
@@ -297,7 +312,7 @@ const onPasswordFocus = () => {
               :loading="loading"
             >
               <transition name="fade-slide-mini" mode="out-in">
-                <span :key="isRegister">{{
+                <span :key="isRegister ? 'register' : 'login'">{{
                   isRegister ? '注册' : '登录'
                 }}</span>
               </transition>
@@ -307,7 +322,7 @@ const onPasswordFocus = () => {
 
         <div class="signupRow">
           <transition name="fade-slide-mini" mode="out-in">
-            <div :key="isRegister">
+            <div :key="isRegister ? 'register' : 'login'">
               {{ isRegister ? '已有账号？' : '暂无账号？' }}
               <span class="signupLink" @click="isRegister = !isRegister">
                 {{ isRegister ? '立即登录' : '立即注册' }}

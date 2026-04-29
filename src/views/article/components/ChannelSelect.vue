@@ -1,28 +1,25 @@
 <!-- 局部组件：文章分类的下拉菜单子组件(select 组件)  -->
-<script setup>
+<script setup lang="ts">
 /**
  * 文章分类下拉选择组件
  * 用于在表单中选择文章分类，支持双向绑定
  */
-import { artGetChannelsService } from '@/api/article.js'
+import { artGetChannelsService } from '@/api/article'
 import { ref } from 'vue'
+import { ArticleChannel } from '@/types'
 
-// 定义组件接收的属性
 defineProps({
-  // 双向绑定的值
   modelValue: {
     type: [Number, String]
   },
-  // 下拉框宽度
   width: {
     type: String
   }
 })
 
-// 定义组件向外提交的事件
 const emit = defineEmits(['update:modelValue'])
 
-const channelList = ref([]) // 分类列表数据
+const channelList = ref<ArticleChannel[]>([])
 
 /**
  * 获取文章分类列表

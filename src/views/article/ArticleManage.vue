@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 /**
  * 文章管理页面
  * 包含文章列表展示、搜索过滤、分页查询以及文章的添加、编辑、删除操作
@@ -7,13 +7,14 @@ import { ref } from 'vue'
 import { Delete, Edit } from '@element-plus/icons-vue'
 import ChannelSelect from './components/ChannelSelect.vue'
 import ArticleEdit from './components/ArticleEdit.vue'
-import { artGetListService, artDelService } from '@/api/article.js'
-import { formatTime } from '@/utils/format.js'
+import { artGetListService, artDelService } from '@/api/article'
+import { formatTime } from '@/utils/format'
+import type { ArticleDetail } from '@/types'
 
 // --- 响应式数据 ---
-const articleList = ref([]) // 文章列表数据
+const articleList = ref<ArticleDetail[]>([]) // 文章列表数据
 const total = ref(0) // 数据总条数
-const loading = ref(false) // 表格加载状态
+const loading = ref(true) // 初始为 true，避免空状态闪烁
 
 // 请求参数对象
 const params = ref({
@@ -29,8 +30,8 @@ const params = ref({
 const getArticleList = async () => {
   loading.value = true
   const res = await artGetListService(params.value)
-  articleList.value = res.data.data
-  total.value = res.data.total
+  articleList.value = res.data.data.data
+  total.value = res.data.data.total
   loading.value = false
 }
 
@@ -39,9 +40,9 @@ getArticleList()
 
 /**
  * 每页条数变化时的处理
- * @param {Number} size - 新的每页条数
+ * @param {number} size - 新的每页条数
  */
-const onSizeChange = (size) => {
+const onSizeChange = (size: number) => {
   params.value.pagenum = 1
   params.value.pagesize = size
   getArticleList()
@@ -49,9 +50,9 @@ const onSizeChange = (size) => {
 
 /**
  * 当前页码变化时的处理
- * @param {Number} page - 新的页码
+ * @param {number} page - 新的页码
  */
-const onCurrentChange = (page) => {
+const onCurrentChange = (page: number) => {
   params.value.pagenum = page
   getArticleList()
 }
@@ -85,17 +86,17 @@ const onAddArticle = () => {
 
 /**
  * 编辑文章
- * @param {Object} row - 当前行数据
+ * @param {ArticleDetail} row - 当前行数据
  */
-const onEditArticle = (row) => {
+const onEditArticle = (row: ArticleDetail) => {
   articleEdit.value.open(row)
 }
 
 /**
  * 删除文章
- * @param {Object} row - 当前行数据
+ * @param {ArticleDetail} row - 当前行数据
  */
-const onDeleteArticle = async (row) => {
+const onDeleteArticle = async (row: ArticleDetail) => {
   try {
     await ElMessageBox.confirm(
       '确定要删除这篇文章吗？删除后无法恢复。',
@@ -116,9 +117,9 @@ const onDeleteArticle = async (row) => {
 
 /**
  * 子组件操作成功后的回调
- * @param {String} type - 操作类型 (add/edit)
+ * @param {string} type - 操作类型 (add/edit)
  */
-const onSuccess = (type) => {
+const onSuccess = (type: string) => {
   if (type === 'add') {
     // 添加成功，计算并跳转到最后一页
     const lastPage = Math.ceil((total.value + 1) / params.value.pagesize)

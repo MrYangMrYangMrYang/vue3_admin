@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 /**
  * 文章分类管理页面
  * 用于展示文章分类列表，并提供添加、编辑、删除分类的功能
@@ -7,10 +7,10 @@ import { ref } from 'vue'
 import { Edit, Delete } from '@element-plus/icons-vue'
 import { artGetChannelsService, artDelChannelService } from '@/api/article'
 import ChannelEdit from './components/ChannelEdit.vue'
+import { ArticleChannel as ArticleChannelType } from '@/types'
 
-// 获取文章分类列表
-const channelList = ref([]) // 分类列表数据
-const loading = ref(false) // 加载状态，用于控制表格的 v-loading
+const channelList = ref<ArticleChannelType[]>([])
+const loading = ref(true) // 初始为 true，避免空状态闪烁
 
 /**
  * 获取所有文章分类列表并更新数据
@@ -28,11 +28,7 @@ getChannelList()
 // 通过ref标识获取子组件实例
 const dialog = ref()
 
-/**
- * 编辑文章分类
- * @param {Object} row - 当前行数据
- */
-const onEditChannel = (row) => {
+const onEditChannel = (row: ArticleChannelType, _index?: number) => {
   dialog.value.open(row)
 }
 
@@ -40,14 +36,13 @@ const onEditChannel = (row) => {
  * 添加文章分类
  */
 const onAddChannel = () => {
-  dialog.value.open({})
+  dialog.value.open({} as ArticleChannelType)
 }
 
 /**
  * 删除文章分类
- * @param {Object} row - 当前行数据
  */
-const onDelChannel = async (row) => {
+const onDelChannel = async (row: ArticleChannelType, _index?: number) => {
   try {
     await ElMessageBox.confirm(
       '确定要删除该分类吗？删除后该分类下的文章将变为"未分类"。',

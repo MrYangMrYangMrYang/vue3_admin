@@ -1,5 +1,5 @@
 <!-- 局部组件：文章管理的编辑和添加子组件(Drawer 抽屉组件)  -->
-<script setup>
+<script setup lang="ts">
 /**
  * 文章编辑/发布抽屉组件
  * 支持文章内容的富文本编辑、封面上传以及发布/草稿状态切换
@@ -7,6 +7,7 @@
 import { ref, nextTick } from 'vue'
 import ChannelSelect from './ChannelSelect.vue'
 import { Plus } from '@element-plus/icons-vue'
+import type { UploadFile } from 'element-plus'
 // 引入适配vue3的富文本编辑器:vue-quill
 import { QuillEditor } from '@vueup/vue-quill'
 import '@vueup/vue-quill/dist/vue-quill.snow.css'
@@ -22,8 +23,19 @@ import axios from 'axios'
 const visibleDrawer = ref(false)
 // 表单引用
 const form = ref()
+
+// 表单数据对象接口
+interface ArticleFormModel {
+  id?: number
+  title: string
+  cate_id: string | number
+  cover_img: string | File
+  content: string
+  state: string
+}
+
 // 表单数据对象
-const formModel = ref({
+const formModel = ref<ArticleFormModel>({
   title: '', // 标题
   cate_id: '', // 分类id
   cover_img: '', // 封面图片 file 对象
@@ -50,7 +62,7 @@ const rules = {
   content: [
     {
       required: true,
-      validator: (rule, value, callback) => {
+      validator: (_rule: any, value: string, callback: Function) => {
         // 去除 HTML 标签后验证纯文本内容
         const textContent = value ? value.replace(/<[^>]*>/g, '').trim() : ''
         if (!textContent) {
@@ -71,9 +83,10 @@ const imgUrl = ref('')
 
 /**
  * 选择图片后的处理逻辑
- * @param {Object} uploadFile - Element Plus 上传组件返回的文件对象
+ * @param {UploadFile} uploadFile - Element Plus 上传组件返回的文件对象
  */
-const onSelectFile = (uploadFile) => {
+const onSelectFile = (uploadFile: UploadFile) => {
+  if (!uploadFile.raw) return
   // 创建临时的预览 URL
   imgUrl.value = URL.createObjectURL(uploadFile.raw)
   // 保存原始文件对象用于后续提交
@@ -87,11 +100,11 @@ const onSelectFile = (uploadFile) => {
 /**
  * 将网络图片地址转换为 File 对象的工具函数
  * 用于在编辑文章时，将回显的图片 URL 转换为后端所需的 File 格式
- * @param {String} imageUrl - 图片网络地址
- * @param {String} filename - 文件名
+ * @param {string} imageUrl - 图片网络地址
+ * @param {string} filename - 文件名
  * @returns {Promise<File|null>}
  */
-async function imageUrlToFileObject(imageUrl, filename) {
+async function imageUrlToFileObject(imageUrl: string, filename: string): Promise<File | null> {
   try {
     const response = await axios.get(imageUrl, { responseType: 'arraybuffer' })
     const blob = new Blob([response.data], {
@@ -101,7 +114,7 @@ async function imageUrlToFileObject(imageUrl, filename) {
       type: response.headers['content-type']
     })
     return file
-  } catch {
+  } catch (_error: unknown) {
     ElMessage.error('图片转换失败')
     return null
   }
@@ -111,20 +124,27 @@ const emit = defineEmits(['success'])
 
 /**
  * 发布或保存草稿
- * @param {String} state - 文章状态 ('已发布' | '草稿')
+ * @param {string} state - 文章状态 ('已发布' | '草稿')
  */
-const onPublish = async (state) => {
+const onPublish = async (state: string) => {
   await form.value.validate()
   formModel.value.state = state
 
   // 接口要求 multipart/form-data 格式，使用 FormData 封装
   const fd = new FormData()
-  for (const key in formModel.value) {
-    fd.append(key, formModel.value[key])
+  fd.append('title', formModel.value.title)
+  fd.append('cate_id', String(formModel.value.cate_id))
+  fd.append('content', formModel.value.content)
+  fd.append('state', formModel.value.state)
+  if (formModel.value.cover_img instanceof File) {
+    fd.append('cover_img', formModel.value.cover_img)
+  } else {
+    fd.append('cover_img', formModel.value.cover_img as string)
   }
 
   if (formModel.value.id) {
     // 编辑现有文章
+    fd.append('id', String(formModel.value.id))
     await artEditService(fd)
     ElMessage.success('修改成功')
     visibleDrawer.value = false
@@ -143,23 +163,30 @@ const editor = ref()
 
 /**
  * 打开抽屉
- * @param {Object} obj - 文章对象。包含 id 时为编辑模式，否则为发布模式
+ * @param {Partial<ArticleDetail>} obj - 文章对象。包含 id 时为编辑模式，否则为发布模式
  */
-const open = async (obj) => {
+const open = async (obj: Partial<ArticleFormModel>) => {
   visibleDrawer.value = true
   await nextTick()
 
   if (obj.id) {
     // 编辑模式：拉取详情并回显
-    const res = await artGetDetailService(obj.id)
-    formModel.value = res.data.data
+    const res = await artGetDetailService(obj.id!)
+    const data = res.data.data
+    formModel.value = {
+      id: data.id,
+      title: data.title,
+      cate_id: data.cate_id,
+      cover_img: '',
+      content: data.content,
+      state: data.state
+    }
     // 处理图片回显：展示预览图并将 URL 转换为 File 对象
-    imgUrl.value = baseURL + formModel.value.cover_img
-    const file = await imageUrlToFileObject(
-      imgUrl.value,
-      formModel.value.cover_img
-    )
-    formModel.value.cover_img = file
+    imgUrl.value = baseURL + data.cover_img
+    const file = await imageUrlToFileObject(imgUrl.value, data.cover_img)
+    if (file) {
+      formModel.value.cover_img = file
+    }
   } else {
     // 发布模式：清空数据
     formModel.value = {

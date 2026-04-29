@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 /**
  * 用户基本资料页面
  * 用于展示和修改当前登录用户的基本信息（如昵称、邮箱）

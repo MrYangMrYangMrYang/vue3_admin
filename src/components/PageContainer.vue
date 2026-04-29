@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 /**
  * 全局页面容器组件 (基于 ElCard)
  * 用于统一后台页面的边距、圆角以及头部布局

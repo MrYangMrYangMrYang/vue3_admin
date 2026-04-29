@@ -1,71 +1,148 @@
+/**
+ * @fileoverview ESLint 扁平配置文件（ESLint Flat Config）
+ * @description 配置 Vue 3 + TypeScript 项目的代码质量检查规则、Prettier 格式化和全局变量
+ * @author Vue3 Big Event Admin Team
+ * @version 1.0.0
+ *
+ * @remarks
+ * 本配置文件负责：
+ * - JavaScript/TypeScript/Vue 文件的语法检查
+ * - Vue 组件的最佳实践规则
+ * - Prettier 格式化集成（保存时自动修复）
+ * - Element Plus 全局组件声明（避免未定义错误）
+ *
+ * @see {@link https://eslint.org/docs/latest/use/configure/configuration-files-new} ESLint Flat Config 文档
+ */
+
 import { defineConfig, globalIgnores } from 'eslint/config'
 import globals from 'globals'
 import js from '@eslint/js'
+import tseslint from 'typescript-eslint'
 import pluginVue from 'eslint-plugin-vue'
 import configPrettier from '@vue/eslint-config-prettier'
-// defineConfig: ESLint 扁平配置的包装函数
-// globalIgnores: 全局忽略模式配置
-// globals: 提供各种环境的全局变量定义
-// js: 官方 JavaScript 规则
-// pluginVue: Vue.js 语法规则插件
-// configPrettier: 禁用与 Prettier 冲突的 ESLint 规则
 
-// 导出基础的配置结构
 export default defineConfig([
-  // 配置数组，按顺序应用
-
-  // 1.文件匹配范围
+  // ==================== 1. 文件匹配范围 ====================
   {
     name: 'app/files-to-lint',
-    files: ['**/*.{js,mjs,jsx,vue}'] // 匹配所有 JS 和 Vue 文件
+    /** 匹配需要检查的文件类型 */
+    files: ['**/*.{js,mjs,jsx,ts,tsx,vue}']
   },
 
-  // 2.全局忽略目录
-  globalIgnores(['**/dist/**', '**/dist-ssr/**', '**/coverage/**']), // 忽略构建输出和测试覆盖率目录
+  // ==================== 2. 全局忽略目录 ====================
+  globalIgnores([
+    /** 构建输出目录（由 Vite 生成） */
+    '**/dist/**',
+    /** SSR 构建输出 */
+    '**/dist-ssr/**',
+    /** 测试覆盖率报告 */
+    '**/coverage/**'
+  ]),
 
-  // 3.全局变量配置
+  // ==================== 3. 全局变量声明 ====================
   {
     languageOptions: {
       globals: {
-        // 浏览器环境全局变量
+        /** 浏览器环境全局变量（window, document 等） */
         ...globals.browser,
-        // 声明element库中 EIMessage 组件的全局变量名，避免在vscode中报错
+        /**
+         * Element Plus 消息提示组件（自动导入，无需手动 import）
+         * @type {readonly}
+         */
         ElMessage: 'readonly',
+        /**
+         * Element Plus 消息弹框组件（自动导入，无需手动 import）
+         * @type {readonly}
+         */
         ElMessageBox: 'readonly',
+        /**
+         * Element Plus 加载指令组件（自动导入，无需手动 import）
+         * @type {readonly}
+         */
         ElLoading: 'readonly'
       }
     }
   },
 
-  // 4.插件规则继承
-  ...pluginVue.configs['flat/essential'], // Vue.js 基础规则
-  js.configs.recommended, // JavaScript 推荐规则
+  // ==================== 4. TypeScript 配置 ====================
+  ...tseslint.configs.recommended,
 
-  // 5.自定义规则配置
+  // ==================== 5. 插件规则继承 ====================
+  ...pluginVue.configs['flat/essential'],
+  js.configs.recommended,
+
+  // ==================== 6. 自定义规则配置 ====================
   {
     rules: {
-      // (1)自定义eslint规则
-      // Vue 相关规则
+      /* ---------- Vue 相关规则 ---------- */
+
+      /**
+       * Vue 组件名称必须为多单词组合
+       * @rule vue/multi-word-component-names
+       * @param {'warn'} severity - 警告级别
+       * @param {Object} options - 规则选项
+       * @param {string[]} options.ignores - 忽略的组件名列表
+       */
       'vue/multi-word-component-names': [
         'warn',
         {
-          ignores: ['index'] // vue组件名称多单词组成（忽略index.vue）
+          /** 忽略 index.vue 等特殊组件名 */
+          ignores: ['index']
         }
       ],
-      'vue/no-setup-props-destructure': ['off'], // 关闭 props 解构的校验
 
-      // JavaScript 相关规则
-      'no-undef': 'error', // 未定义变量错误提示
-      'no-unused-vars': 'warn', // 未使用变量警告
-      'no-console': 'warn', // 使用 console 警告
-      'prefer-const': 'error', // 建议使用 const
+      /**
+       * 允许 props 解构（Vue 3.3+ 支持）
+       * @rule vue/no-setup-props-destructure
+       */
+      'vue/no-setup-props-destructure': ['off'],
 
-      // (2)自定义prettier规则 (格式化工具:专注于代码的美观度)
-      // 前置条件：禁用格式化插件 prettier、vs配置中的formatOnSave属性要关闭、安装Eslint插件, 并配置保存时自动修复
-      'prettier/prettier': 'warn' // Prettier 格式化问题显示为警告
+      /* ---------- JavaScript 相关规则 ---------- */
+
+      /** 禁止使用未定义的变量 */
+      'no-undef': 'error',
+
+      /** 未使用的变量显示警告（不阻塞构建） */
+      'no-unused-vars': 'warn',
+
+      /** 使用 console 显示警告（生产环境应移除） */
+      'no-console': 'warn',
+
+      /** 建议使用 const 而非 let（不可变优先） */
+      'prefer-const': 'error',
+
+      /* ---------- TypeScript 相关规则 ---------- */
+
+      /**
+       * 允许隐式 any 类型（开发阶段可放宽）
+       * 生产环境建议改为 'error'
+       */
+      '@typescript-eslint/no-explicit-any': ['warn'],
+
+      /**
+       * 未使用的 TypeScript 变量显示警告
+       */
+      '@typescript-eslint/no-unused-vars': ['warn'],
+
+      /* ---------- Prettier 格式化规则 ---------- */
+
+      /**
+       * Prettier 格式化问题显示为警告
+       * 需配合 VS Code 的 "保存时运行 linter" 设置
+       *
+       * @requires
+       * - 安装 ESLint 插件
+       * - 关闭 VS Code 的 formatOnSave
+       * - 启用 codeActionsOnSave.source.fixAll
+       */
+      'prettier/prettier': 'warn'
     }
   },
 
-  // 6.配置顺序说明
-  configPrettier // 必须在最后，禁用与 Prettier 冲突的规则
+  // ==================== 7. Prettier 冲突禁用 ====================
+  /**
+   * 必须放在最后！
+   * 禁用所有与 Prettier 冲突的格式化规则（如缩进、引号等）
+   */
+  configPrettier
 ])

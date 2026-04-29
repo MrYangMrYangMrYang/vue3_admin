@@ -1,32 +1,22 @@
 <!-- 局部组件：文章分类的编辑和添加子组件(dialog 组件)  -->
-<script setup>
+<script setup lang="ts">
 /**
  * 文章分类编辑/添加弹窗组件
  * 用于处理分类的创建和更新
  */
 // nextTick 是 Vue 提供的一个方法，用于在 DOM 更新完成后执行回调函数。它解决了数据更新后，DOM 尚未同步更新的问题，确保操作的是最新的 DOM。
 import { ref, nextTick } from 'vue'
-import { artEditChannelService, artAddChannelService } from '@/api/article.js'
+import { artEditChannelService, artAddChannelService } from '@/api/article'
+import { ChannelFormData } from '@/types'
 
-// 表单数据对象
-const formModel = ref({ cate_name: '', cate_alias: '' })
-const dialogVisible = ref(false) // 控制弹层显示隐藏
-const form = ref() // 获取 el-form 实例
+const formModel = ref<ChannelFormData>({ cate_name: '', cate_alias: '' })
+const dialogVisible = ref(false)
+const form = ref()
 
-/**
- * 打开弹窗
- * @param {Object} obj - 传入的分类对象。若为空对象则为添加，若包含 id 则为编辑
- * @example
- * open({}) // 添加模式
- * open({ id: 1, cate_name: '新闻', cate_alias: 'news' }) // 编辑模式
- */
-const open = async (obj) => {
+const open = async (obj: ChannelFormData) => {
   dialogVisible.value = true
-  // 等待弹层完全渲染后操作 DOM/组件
   await nextTick()
-  // 回显或重置数据
   formModel.value = { ...obj }
-  // 清除上一次的验证结果
   form.value?.clearValidate()
 }
 

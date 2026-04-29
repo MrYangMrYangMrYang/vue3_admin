@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 /**
  * 后台布局容器组件
  * 包含侧边栏菜单、顶部导航头、用户信息展示、以及二级路由出口
@@ -17,6 +17,7 @@ import {
 } from '@element-plus/icons-vue'
 import avatar from '@/assets/default.png'
 import { useUserStore } from '@/stores'
+import type { UserInfo } from '@/types'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -32,9 +33,9 @@ const router = useRouter()
 
 /**
  * 处理顶部下拉菜单的点击命令
- * @param {String} key - 命令关键字 (profile/avatar/password/logout)
+ * @param {string} key - 命令关键字 (profile/avatar/password/logout)
  */
-const handleCommand = async (key) => {
+const handleCommand = async (key: string) => {
   if (key === 'logout') {
     // 退出登录：弹出确认框
     await ElMessageBox.confirm('你确认要进行退出么', '温馨提示', {
@@ -44,7 +45,13 @@ const handleCommand = async (key) => {
     })
     // 清除 Token 和用户信息
     userStore.removeToken()
-    userStore.setUser({})
+    userStore.setUser({} as UserInfo)
+    // 退出登录成功提示
+    ElMessage.success({
+      message: '已安全退出登录',
+      duration: 1500,
+      grouping: true
+    })
     // 跳转到登录页
     router.push('/login')
   } else {

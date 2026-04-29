@@ -1,0 +1,85 @@
+/**
+ * @fileoverview TypeScript 编译器配置文件（应用层）
+ * @description 定义 Vue 3 应用的 TypeScript 编译选项、类型检查规则和路径映射
+ * @author Vue3 Big Event Admin Team
+ * @version 1.0.0
+ *
+ * @remarks
+ * 本配置文件负责：
+ * - 设置编译目标为 ES2020（支持现代浏览器）
+ * - 启用严格模式确保类型安全
+ * - 配置路径别名 @/* → ./src/*
+ * - 支持 Vue 单文件组件的 TypeScript 类型检查
+ */
+
+{
+  "compilerOptions": {
+    /** 编译目标版本：ES2020 支持可选链、空值合并等现代语法 */
+    "target": "ES2020",
+
+    /** 使用 ES2020 的 defineProperty 语义处理类字段 */
+    "useDefineForClassFields": true,
+
+    /** 模块系统：ESNext 支持 tree-shaking 和动态导入 */
+    "module": "ESNext",
+
+    /** 包含的类型库定义（DOM、迭代器等） */
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+
+    /** 跳过 .d.ts 类型声明文件的检查（提升性能） */
+    "skipLibCheck": true,
+
+    /* ==================== Bundler Mode ==================== */
+
+    /** 模块解析策略：bundler 模式兼容 Vite/Rollup/Webpack */
+    "moduleResolution": "bundler",
+
+    /** 允许导入 .ts 扩展名（配合 allowImportingTsExtensions） */
+    "allowImportingTsExtensions": true,
+
+    /** 隔离模块转换：每个文件独立编译（兼容 Babel/ESBuild） */
+    "isolatedModules": true,
+
+    /** 强制检测文件是脚本还是模块 */
+    "moduleDetection": "force",
+
+    /** 不输出编译结果（由 Vite 处理打包） */
+    "noEmit": true,
+
+    /** JSX 保留模式：Vue 3 的 TSX 支持 */
+    "jsx": "preserve",
+
+    /* ==================== Linting Rules ==================== */
+
+    /** 启用严格模式：禁止隐式 any、null 检查等 */
+    "strict": true,
+
+    /** 允许未使用的局部变量（开发阶段可放宽） */
+    "noUnusedLocals": false,
+
+    /** 允许未使用的函数参数（开发阶段可放宽） */
+    "noUnusedParameters": false,
+
+    /** switch 语句必须包含 break/return（防止 fall-through） */
+    "noFallthroughCasesInSwitch": true,
+
+    /* ==================== Path Aliases ==================== */
+
+    /** 基础目录：项目根目录 */
+    "baseUrl": ".",
+
+    /** 路径映射：@/* 别名指向 src/* 目录 */
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+
+  /** 包含的文件范围：所有 TypeScript、Vue、声明文件 */
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.vue",
+    "env.d.ts",
+    "src/types/**/*.d.ts"
+  ]
+}

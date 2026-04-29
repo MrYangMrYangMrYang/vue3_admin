@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 /**
  * 更换头像页面
  * 支持选择图片预览并上传更新用户头像
@@ -12,17 +12,11 @@ const userStore = useUserStore()
 const imgUrl = ref(userStore.user.user_pic) // 当前头像预览图
 const upload = ref() // el-upload 组件实例
 
-/**
- * 选择本地图片文件后的处理逻辑
- * 使用 FileReader 将图片转换为 base64 格式用于实时预览
- * @param {Object} uploadFile - 上传的文件对象
- */
-const onSelectFile = (uploadFile) => {
+const onSelectFile = (uploadFile: any) => {
   const reader = new FileReader()
-  // 将文件读取为 base64 编码的 Data URL 格式
   reader.readAsDataURL(uploadFile.raw)
   reader.onload = () => {
-    imgUrl.value = reader.result // 更新本地预览
+    imgUrl.value = reader.result as string
   }
 }
 
@@ -35,7 +29,7 @@ const onUpdateAvatar = async () => {
   try {
     loading.value = true
     // 调用接口更新头像 (后端接收 base64 字符串)
-    await userUpdateAvatarService(imgUrl.value)
+    await userUpdateAvatarService(imgUrl.value ?? '')
     // 更新成功后刷新用户信息
     await userStore.getUser()
     ElMessage.success({ message: '头像更新成功', duration: 1500 })
