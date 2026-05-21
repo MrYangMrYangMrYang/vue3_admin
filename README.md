@@ -9,6 +9,12 @@
 </p>
 
 <p align="center">
+  <a href="http://8.163.98.227:8082" target="_blank">
+    <img src="https://img.shields.io/badge/在线预览-http://8.163.98.227:8082-blue?style=for-the-badge" alt="在线预览">
+  </a>
+</p>
+
+<p align="center">
   <img src="https://img.shields.io/badge/Vue-3.5.22-42b883?logo=vue.js" alt="Vue">
   <img src="https://img.shields.io/badge/TypeScript-6.0.3-3178c6?logo=typescript" alt="TypeScript">
   <img src="https://img.shields.io/badge/Vite-7.1.11-646cff?logo=vite" alt="Vite">
