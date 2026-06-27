@@ -85,6 +85,23 @@ export default defineConfig([
     }
   },
 
+  // ==================== 5.2 配置文件 Node 全局变量 ====================
+  /**
+   * vite.config.ts / vitest.config.ts 等配置文件使用 process 等 Node 全局变量，
+   * 需声明 globals 避免 no-undef 误报
+   */
+  {
+    files: ['*.config.{js,ts}', 'eslint.config.js'],
+    languageOptions: {
+      globals: {
+        process: 'readonly',
+        module: 'readonly',
+        require: 'readonly',
+        __dirname: 'readonly'
+      }
+    }
+  },
+
   // ==================== 6. 自定义规则配置 ====================
   {
     rules: {
@@ -116,8 +133,8 @@ export default defineConfig([
       /** 禁止使用未定义的变量 */
       'no-undef': 'error',
 
-      /** 未使用的变量显示警告（不阻塞构建） */
-      'no-unused-vars': 'warn',
+      /** 关闭 JS 版本未使用变量检查（由 @typescript-eslint/no-unused-vars 接管，避免 TS 文件重复报错） */
+      'no-unused-vars': 'off',
 
       /** 使用 console 显示警告（生产环境应移除） */
       'no-console': 'warn',
@@ -135,8 +152,13 @@ export default defineConfig([
 
       /**
        * 未使用的 TypeScript 变量显示警告
+       * @param args 'none' - 不检查函数参数（类型签名中的回调参数名用于文档/IDE 提示，不产生代码）
+       * @param ignoreRestSiblings - 忽略解构 rest 兄弟属性
        */
-      '@typescript-eslint/no-unused-vars': ['warn'],
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        { args: 'none', ignoreRestSiblings: true }
+      ],
 
       /* ---------- Prettier 格式化规则 ---------- */
 

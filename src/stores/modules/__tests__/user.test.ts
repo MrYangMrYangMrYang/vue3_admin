@@ -91,7 +91,9 @@ describe('useUserStore 用户状态管理', () => {
     })
 
     it('getUser API 失败时应抛出错误', async () => {
-      vi.mocked(userGetInfoService).mockRejectedValue(new Error('401 Unauthorized'))
+      vi.mocked(userGetInfoService).mockRejectedValue(
+        new Error('401 Unauthorized')
+      )
 
       const store = useUserStore()
       await expect(store.getUser()).rejects.toThrow('401 Unauthorized')

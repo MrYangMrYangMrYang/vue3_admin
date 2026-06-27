@@ -37,7 +37,9 @@ export const addPending = (config: InternalAxiosRequestConfig): void => {
   const key = String(++requestId)
   const controller = new AbortController()
   config.signal = controller.signal
-  ;(config as InternalAxiosRequestConfig & { _pendingKey?: string })[PENDING_KEY] = key
+  ;(config as InternalAxiosRequestConfig & { _pendingKey?: string })[
+    PENDING_KEY
+  ] = key
   pendingMap.set(key, controller)
 }
 
@@ -46,7 +48,9 @@ export const addPending = (config: InternalAxiosRequestConfig): void => {
  * @param config - axios 请求配置
  */
 export const removePending = (config: InternalAxiosRequestConfig): void => {
-  const key = (config as InternalAxiosRequestConfig & { _pendingKey?: string })[PENDING_KEY]
+  const key = (config as InternalAxiosRequestConfig & { _pendingKey?: string })[
+    PENDING_KEY
+  ]
   if (key) {
     pendingMap.delete(key)
   }

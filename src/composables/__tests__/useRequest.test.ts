@@ -36,7 +36,10 @@ describe('useRequest 通用请求封装', () => {
 
     it('refresh 应使用上次参数重新执行', async () => {
       const fn = vi.fn().mockResolvedValue('ok')
-      const { execute, refresh } = useRequest<(s: string) => Promise<string>, [string]>(fn, {
+      const { execute, refresh } = useRequest<
+        (s: string) => Promise<string>,
+        [string]
+      >(fn, {
         immediate: false
       })
 
@@ -50,9 +53,11 @@ describe('useRequest 通用请求封装', () => {
 
   describe('状态管理', () => {
     it('loading 应在请求期间为 true，完成后为 false', async () => {
-      const fn = vi.fn().mockImplementation(
-        () => new Promise((resolve) => setTimeout(() => resolve('ok'), 10))
-      )
+      const fn = vi
+        .fn()
+        .mockImplementation(
+          () => new Promise((resolve) => setTimeout(() => resolve('ok'), 10))
+        )
       const { loading, execute } = useRequest(fn, { immediate: false })
 
       expect(loading.value).toBe(false)

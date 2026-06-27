@@ -10,14 +10,7 @@
  */
 
 export { useRequest } from './useRequest'
-export type {
-  UseRequestOptions,
-  UseRequestReturn
-} from './useRequest'
+export type { UseRequestOptions, UseRequestReturn } from './useRequest'
 
 export { useTable } from './useTable'
-export type {
-  UseTableOptions,
-  UseTableReturn,
-  PageParams
-} from './useTable'
+export type { UseTableOptions, UseTableReturn, PageParams } from './useTable'

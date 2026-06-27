@@ -28,7 +28,9 @@ type ThemeMode = 'light' | 'dark'
 const getInitialTheme = (): ThemeMode => {
   const stored = localStorage.getItem(STORAGE_KEY)
   if (stored === 'dark' || stored === 'light') return stored
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+  return window.matchMedia('(prefers-color-scheme: dark)').matches
+    ? 'dark'
+    : 'light'
 }
 
 /** 全局主题状态（模块级单例） */

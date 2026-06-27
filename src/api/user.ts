@@ -75,8 +75,7 @@ import type {
  */
 export const userRegisterService = (
   data: RegisterData
-): Promise<AxiosResponse<ApiResponse<null>>> =>
-  request.post('/api/reg', data)
+): Promise<AxiosResponse<ApiResponse<null>>> => request.post('/api/reg', data)
 
 /**
  * 用户登录服务

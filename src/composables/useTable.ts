@@ -123,8 +123,9 @@ export function useTable<P extends PageParams, R>(
       } else {
         // 默认从 res.data.data.{data, total} 提取（黑马 API 标准结构）
         // 使用可选链兜底，避免后端返回结构异常时整页崩溃
-        const payload = (res as { data?: { data?: { data?: R[]; total?: number } } })
-          ?.data?.data
+        const payload = (
+          res as { data?: { data?: { data?: R[]; total?: number } } }
+        )?.data?.data
         list.value = payload?.data ?? []
         total.value = payload?.total ?? 0
       }

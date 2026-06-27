@@ -129,11 +129,11 @@ router.afterEach(() => {
   /** 多色渐变背景 */
   background: linear-gradient(
     90deg,
-    #409eff,  /* Element Plus 主色蓝 */
-    #67c23a,  /* 成功色绿 */
-    #e6a23c,  /* 警告色黄 */
-    #f56c6c,  /* 危险色红 */
-    #409eff   /* 循环回蓝色 */
+    #409eff,
+    /* Element Plus 主色蓝 */ #67c23a,
+    /* 成功色绿 */ #e6a23c,
+    /* 警告色黄 */ #f56c6c,
+    /* 危险色红 */ #409eff /* 循环回蓝色 */
   );
   /** 背景尺寸（用于实现流动动画） */
   background-size: 200% 100%;
