@@ -13,7 +13,11 @@ const pwdForm = ref<UpdatePasswordData>({
   re_pwd: ''
 })
 
-const checkDifferent = (_rule: any, value: string, callback: Function) => {
+const checkDifferent = (
+  _rule: unknown,
+  value: string,
+  callback: (error?: Error) => void
+) => {
   if (value === pwdForm.value.old_pwd) {
     callback(new Error('新密码不能与原密码一样'))
   } else {
@@ -21,7 +25,11 @@ const checkDifferent = (_rule: any, value: string, callback: Function) => {
   }
 }
 
-const checkSameAsNewPwd = (_rule: any, value: string, callback: Function) => {
+const checkSameAsNewPwd = (
+  _rule: unknown,
+  value: string,
+  callback: (error?: Error) => void
+) => {
   if (value !== pwdForm.value.new_pwd) {
     callback(new Error('确认密码必须和新密码一样'))
   } else {

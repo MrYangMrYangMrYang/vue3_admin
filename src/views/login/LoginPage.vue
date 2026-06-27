@@ -57,7 +57,11 @@ const rules = {
       trigger: 'blur'
     },
     {
-      validator: (_rule: any, value: string, callback: Function) => {
+      validator: (
+        _rule: unknown,
+        value: string,
+        callback: (error?: Error) => void
+      ) => {
         if (value !== formModel.value.password) {
           callback(new Error('两次输入密码不一致'))
         } else {

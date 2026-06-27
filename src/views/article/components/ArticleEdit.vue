@@ -51,7 +51,11 @@ const rules = {
   content: [
     {
       required: true,
-      validator: (_rule: any, value: string, callback: Function) => {
+      validator: (
+        _rule: unknown,
+        value: string,
+        callback: (error?: Error) => void
+      ) => {
         // 去除 HTML 标签后验证纯文本内容
         const textContent = value ? value.replace(/<[^>]*>/g, '').trim() : ''
         if (!textContent) {
@@ -83,7 +87,10 @@ const onSelectFile = (uploadFile: UploadFile) => {
  * 将网络图片地址转换为 File 对象
  * 用于编辑文章时将回显的图片 URL 转换为后端所需的 File 格式
  */
-async function imageUrlToFileObject(imageUrl: string, filename: string): Promise<File | null> {
+async function imageUrlToFileObject(
+  imageUrl: string,
+  filename: string
+): Promise<File | null> {
   try {
     const response = await axios.get(imageUrl, { responseType: 'arraybuffer' })
     const blob = new Blob([response.data], {
