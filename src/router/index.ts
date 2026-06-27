@@ -24,6 +24,7 @@
 
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import { useUserStore } from '@/stores'
+import { cancelAllPending } from '@/utils/requestCancel'
 
 /**
  * Vue Router 实例
@@ -153,6 +154,9 @@ const router = createRouter({
  * // - 无 Token → 重定向到 /login
  */
 router.beforeEach((to) => {
+  // 路由切换时取消上一个页面未完成的 GET 请求，避免无意义网络消耗与状态污染
+  cancelAllPending()
+
   /** 获取用户状态管理实例 */
   const useStore = useUserStore()
 

@@ -31,6 +31,21 @@ import { useUserStore } from '@/stores'
 import { ElMessage } from 'element-plus'
 import router from '@/router'
 import type { UserInfo } from '@/types'
+import { addPending, removePending } from './requestCancel'
+
+/**
+ * 扩展 axios 请求配置类型
+ * @description 追加重试计数字段，用于网络错误/5xx 自动重试
+ */
+declare module 'axios' {
+  interface InternalAxiosRequestConfig {
+    /** 已重试次数 */
+    _retryCount?: number
+  }
+}
+
+/** GET 请求最大重试次数 */
+const MAX_RETRY = 2
 
 /**
  * API 基础地址（后端服务地址）
@@ -83,6 +98,9 @@ instance.interceptors.request.use(
       config.headers.Authorization = useStore.token
     }
 
+    // 注册到 pending 池（仅 GET 请求），支持路由切换时取消
+    addPending(config)
+
     return config
   },
   /**
@@ -111,6 +129,9 @@ instance.interceptors.request.use(
  */
 instance.interceptors.response.use(
   (res: AxiosResponse) => {
+    // 请求完成，从 pending 池移除
+    removePending(res.config)
+
     /**
      * 检查业务状态码
      * code === 0 表示操作成功，直接返回响应
@@ -140,6 +161,36 @@ instance.interceptors.response.use(
    * - 其他错误：显示通用错误提示
    */
   (err: any) => {
+    // 路由切换取消的请求：静默处理，不弹错误提示
+    if (err.code === 'ERR_CANCELED') {
+      return Promise.reject(err)
+    }
+
+    // 请求结束，从 pending 池移除
+    if (err.config) {
+      removePending(err.config)
+    }
+
+    /**
+     * GET 请求自动重试
+     * @description 网络错误（无 response）或 5xx 服务端错误时，指数退避重试
+     * - 仅 GET 请求，避免写操作重复提交
+     * - 最多重试 2 次，间隔递增（1s / 2s）
+     */
+    const config = err.config
+    const isRetryable =
+      config?.method === 'get' &&
+      (config._retryCount ?? 0) < MAX_RETRY &&
+      (!err.response || err.response.status >= 500)
+
+    if (isRetryable) {
+      config._retryCount = (config._retryCount ?? 0) + 1
+      const delay = 1000 * config._retryCount
+      return new Promise((resolve) => {
+        setTimeout(() => resolve(instance(config)), delay)
+      })
+    }
+
     /**
      * 401 未授权处理
      * Token 过期或无效时，清理本地认证状态并跳转登录页
