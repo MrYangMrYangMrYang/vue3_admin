@@ -80,6 +80,43 @@ const onDeleteArticle = async (row: ArticleDetail) => {
   }
 }
 
+/** 表格选中行（批量删除用） */
+const selectedRows = ref<ArticleDetail[]>([])
+
+/**
+ * 批量删除选中文章
+ * @description 黑马 API 无批量删除接口，用 Promise.allSettled 并发调用单个删除
+ */
+const onBatchDelete = async () => {
+  if (selectedRows.value.length === 0) return
+  try {
+    await ElMessageBox.confirm(
+      `确定要删除选中的 ${selectedRows.value.length} 篇文章吗？删除后无法恢复。`,
+      '批量删除确认',
+      {
+        confirmButtonText: '删除',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+    // 并发删除，allSettled 统计成功/失败
+    const results = await Promise.allSettled(
+      selectedRows.value.map((row) => artDelService(row.id))
+    )
+    const successCount = results.filter((r) => r.status === 'fulfilled').length
+    const failCount = results.length - successCount
+    if (failCount === 0) {
+      ElMessage.success(`成功删除 ${successCount} 篇文章`)
+    } else {
+      ElMessage.warning(`成功 ${successCount} 篇，失败 ${failCount} 篇`)
+    }
+    selectedRows.value = []
+    getArticleList()
+  } catch {
+    // 用户取消批量删除
+  }
+}
+
 /**
  * 子组件操作成功后的回调
  * @param {string} type - 操作类型 (add/edit)
@@ -124,8 +161,23 @@ const onSuccess = (type: string) => {
       </el-form-item>
     </el-form>
 
+    <!-- 批量操作工具栏（选中行时显示） -->
+    <div class="batch-bar" v-if="selectedRows.length > 0">
+      <span class="batch-count">已选择 {{ selectedRows.length }} 项</span>
+      <el-button type="danger" :icon="Delete" @click="onBatchDelete">
+        批量删除
+      </el-button>
+    </div>
+
     <!-- 表格区域 -->
-    <el-table :data="articleList" v-loading="loading" border stripe>
+    <el-table
+      :data="articleList"
+      v-loading="loading"
+      border
+      stripe
+      @selection-change="selectedRows = $event"
+    >
+      <el-table-column type="selection" width="48" />
       <el-table-column label="文章标题" min-width="200">
         <template #default="{ row }">
           <el-link type="primary" :underline="false">{{ row.title }}</el-link>
@@ -196,6 +248,19 @@ const onSuccess = (type: string) => {
   :deep(.el-form-item) {
     margin-right: 0;
     margin-bottom: 10px;
+  }
+}
+.batch-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+  padding: 10px 16px;
+  background: var(--el-fill-color-light, #f5f7fa);
+  border-radius: 4px;
+  .batch-count {
+    color: var(--el-text-color-regular, #606266);
+    font-size: 14px;
   }
 }
 </style>
