@@ -58,10 +58,10 @@ declare module '*.vue' {
  * @property {typeof ElNotification} ElNotification - 通知组件
  */
 declare global {
-  const ElMessage: typeof import('element-plus')['ElMessage']
-  const ElMessageBox: typeof import('element-plus')['ElMessageBox']
-  const ElLoading: typeof import('element-plus')['ElLoading']
-  const ElNotification: typeof import('element-plus')['ElNotification']
+  const ElMessage: (typeof import('element-plus'))['ElMessage']
+  const ElMessageBox: (typeof import('element-plus'))['ElMessageBox']
+  const ElLoading: (typeof import('element-plus'))['ElLoading']
+  const ElNotification: (typeof import('element-plus'))['ElNotification']
 }
 
 export {}
