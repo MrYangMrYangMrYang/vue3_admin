@@ -31,8 +31,14 @@ import { useUserStore } from '@/stores'
 import { ElMessage } from 'element-plus'
 import router from '@/router'
 
-/** API 基础地址（后端服务地址） */
-const baseURL = 'http://big-event-vue-api-t.itheima.net'
+/**
+ * API 基础地址（后端服务地址）
+ * @description 通过 Vite 环境变量注入，区分开发/生产环境
+ *
+ * @see {@link file:../../.env.development} 开发环境配置
+ * @see {@link file:../../.env.production} 生产环境配置
+ */
+const baseURL = import.meta.env.VITE_API_BASE_URL
 
 /**
  * Axios 实例
