@@ -42,6 +42,22 @@ import '@/assets/main.scss'
 const app = createApp(App)
 
 /**
+ * 全局错误处理器
+ * @description 捕获未被 ErrorBoundary 拦截的组件级错误（渲染、生命周期、事件处理）
+ *
+ * @remarks
+ * - 开发环境：输出结构化日志便于调试
+ * - 生产环境：预留错误上报接入点（Sentry / 自建埋点等）
+ * - 被 ErrorBoundary 捕获并返回 false 的错误不会到达此处
+ */
+app.config.errorHandler = (err, _instance, info) => {
+  if (import.meta.env.DEV) {
+    console.error('[全局错误]', info, err)
+  }
+  // 生产环境可在此接入错误上报服务
+}
+
+/**
  * 注册 Pinia 插件
  * @description 启用响应式状态管理和数据持久化
  *

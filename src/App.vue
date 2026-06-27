@@ -33,6 +33,7 @@ import zhCn from 'element-plus/es/locale/lang/zh-cn'
 
 import { ref } from 'vue'
 import router from '@/router'
+import ErrorBoundary from '@/components/ErrorBoundary.vue'
 
 /**
  * 路由加载状态
@@ -88,11 +89,17 @@ router.afterEach(() => {
     -->
     <el-config-provider :locale="zhCn">
       <!--
-        路由视图容器
-        根据 URL 动态渲染匹配的路由组件
-        由 vue-router 自动管理
+        错误边界
+        捕获路由组件渲染/生命周期错误，提供降级 UI 与重试入口
       -->
-      <router-view></router-view>
+      <ErrorBoundary>
+        <!--
+          路由视图容器
+          根据 URL 动态渲染匹配的路由组件
+          由 vue-router 自动管理
+        -->
+        <router-view></router-view>
+      </ErrorBoundary>
     </el-config-provider>
   </div>
 </template>

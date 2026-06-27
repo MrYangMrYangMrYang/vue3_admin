@@ -30,6 +30,7 @@ import axios, {
 import { useUserStore } from '@/stores'
 import { ElMessage } from 'element-plus'
 import router from '@/router'
+import type { UserInfo } from '@/types'
 
 /**
  * API 基础地址（后端服务地址）
@@ -141,9 +142,15 @@ instance.interceptors.response.use(
   (err: any) => {
     /**
      * 401 未授权处理
-     * Token 过期或无效时，跳转到登录页重新登录
+     * Token 过期或无效时，清理本地认证状态并跳转登录页
+     *
+     * @remarks
+     * 必须同时清除 token 和 user 信息，避免残留过期数据导致下次进入仍显示旧用户
      */
     if (err.response?.status === 401) {
+      const userStore = useUserStore()
+      userStore.removeToken()
+      userStore.setUser({} as UserInfo)
       router.push('/login')
     }
 

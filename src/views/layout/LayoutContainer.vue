@@ -24,9 +24,14 @@ import { useRouter } from 'vue-router'
 const isCollapse = ref(false) // 侧边栏折叠状态
 const userStore = useUserStore()
 
-onMounted(() => {
+onMounted(async () => {
   // 页面加载后，自动获取最新的用户信息
-  userStore.getUser()
+  // 失败时（如 401）由 request 拦截器统一处理跳转，此处静默捕获避免未处理 Promise 拒绝
+  try {
+    await userStore.getUser()
+  } catch {
+    // 静默处理：错误提示与跳转已在 request 拦截器中完成
+  }
 })
 
 const router = useRouter()

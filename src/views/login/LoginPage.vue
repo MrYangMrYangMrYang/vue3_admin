@@ -109,13 +109,8 @@ const login = async () => {
     loading.value = true
     const res = await userLoginService(formModel.value)
 
-    // 安全提取 Token - 兼容多种后端响应格式（使用类型断言避免 TS 报错）
-    const responseData = res.data as Record<string, any>
-    const innerData = (responseData.data || {}) as Record<string, any>
-
-    // 优先使用 res.data.data.token，否则尝试 res.data.token（兼容不同后端格式）
-    const token = (innerData.token || responseData.token) as string
-
+    // 黑马 API 标准响应：res.data.data.token（类型已由 LoginResponseData 约束）
+    const token = res.data.data.token
     if (!token) {
       throw new Error('登录响应中未获取到 Token')
     }
