@@ -67,6 +67,8 @@ instance.interceptors.response.use(
     const axiosErr = err as {
       code?: string
       config?: InternalAxiosRequestConfig
+      response?: { status: number; data?: { message?: string } }
+      message?: string
     }
     // 路由切换取消的请求：静默处理，不弹错误提示
     if (axiosErr.code === 'ERR_CANCELED') {
@@ -80,7 +82,7 @@ instance.interceptors.response.use(
     // GET 请求自动重试：网络错误（无 response）或 5xx 时指数退避（1s / 2s）
     // 仅 GET 请求，避免写操作重复提交；最多重试 MAX_RETRY 次
     const config = axiosErr.config
-    const response = (err as { response?: { status: number } }).response
+    const response = axiosErr.response
     const isRetryable =
       config?.method === 'get' &&
       (config._retryCount ?? 0) < MAX_RETRY &&
@@ -95,14 +97,16 @@ instance.interceptors.response.use(
     }
 
     // 401 未授权：必须同时清除 token 和 user，避免残留过期数据导致下次进入仍显示旧用户
-    if (err.response?.status === 401) {
+    if (axiosErr.response?.status === 401) {
       const userStore = useUserStore()
       userStore.removeToken()
       userStore.setUser({} as UserInfo)
       router.push('/login')
     }
 
-    ElMessage.error(err.response?.data?.message || err.message || '服务异常')
+    ElMessage.error(
+      axiosErr.response?.data?.message || axiosErr.message || '服务异常'
+    )
     return Promise.reject(err)
   }
 )
