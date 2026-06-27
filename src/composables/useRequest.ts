@@ -17,7 +17,7 @@ import { ref, type Ref } from 'vue'
 /**
  * useRequest 配置项
  */
-interface UseRequestOptions<T> {
+export interface UseRequestOptions<T> {
   /** 是否立即执行一次（默认 false） */
   immediate?: boolean
   /** 初始数据（避免首次加载前 data 为 undefined） */
@@ -31,7 +31,7 @@ interface UseRequestOptions<T> {
 /**
  * useRequest 返回值
  */
-interface UseRequestReturn<T, A extends unknown[]> {
+export interface UseRequestReturn<T, A extends unknown[]> {
   /** 响应数据 */
   data: Ref<T | undefined>
   /** 加载状态 */

@@ -18,7 +18,7 @@ import { ref, type Ref } from 'vue'
  * 分页参数基础类型约束
  * @description 所有分页请求参数必须包含 pagenum 和 pagesize
  */
-interface PageParams {
+export interface PageParams {
   /** 当前页码（从 1 开始） */
   pagenum: number
   /** 每页显示条数 */
@@ -28,7 +28,7 @@ interface PageParams {
 /**
  * useTable 配置项
  */
-interface UseTableOptions<P, R> {
+export interface UseTableOptions<P, R> {
   /** 初始查询参数（除 pagenum/pagesize 外的筛选条件，如 cate_id、state） */
   initialParams?: Partial<Omit<P, keyof PageParams>>
   /** 初始每页条数（默认 5） */
@@ -45,7 +45,7 @@ interface UseTableOptions<P, R> {
 /**
  * useTable 返回值
  */
-interface UseTableReturn<P extends PageParams, R> {
+export interface UseTableReturn<P extends PageParams, R> {
   /** 列表数据 */
   list: Ref<R[]>
   /** 数据总条数 */
