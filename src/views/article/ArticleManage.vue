@@ -2,6 +2,9 @@
 /**
  * 文章管理页面
  * 包含文章列表展示、搜索过滤、分页查询以及文章的添加、编辑、删除操作
+ *
+ * @remarks
+ * 使用 useTable composable 封装分页列表逻辑，消除重复样板代码
  */
 import { ref } from 'vue'
 import { Delete, Edit } from '@element-plus/icons-vue'
@@ -9,71 +12,30 @@ import ChannelSelect from './components/ChannelSelect.vue'
 import ArticleEdit from './components/ArticleEdit.vue'
 import { artGetListService, artDelService } from '@/api/article'
 import { formatTime } from '@/utils/format'
+import { useTable } from '@/composables'
 import type { ArticleDetail } from '@/types'
 
-// --- 响应式数据 ---
-const articleList = ref<ArticleDetail[]>([]) // 文章列表数据
-const total = ref(0) // 数据总条数
-const loading = ref(true) // 初始为 true，避免空状态闪烁
-
-// 请求参数对象
-const params = ref({
-  pagenum: 1, // 当前页码
-  pagesize: 5, // 每页显示条数
-  cate_id: '', // 选中的文章分类 ID
-  state: '' // 选中的发布状态 (已发布/草稿)
+/**
+ * 分页列表管理
+ * @description useTable 自动管理 list/total/loading/params 与分页/搜索/重置逻辑
+ */
+const {
+  list: articleList,
+  total,
+  loading,
+  params,
+  getList: getArticleList,
+  onSizeChange,
+  onCurrentChange,
+  onSearch,
+  onReset
+} = useTable<
+  { pagenum: number; pagesize: number; cate_id: string; state: string },
+  ArticleDetail
+>(artGetListService, {
+  initialParams: { cate_id: '', state: '' },
+  initialPageSize: 5
 })
-
-/**
- * 获取文章列表数据
- */
-const getArticleList = async () => {
-  loading.value = true
-  const res = await artGetListService(params.value)
-  articleList.value = res.data.data.data
-  total.value = res.data.data.total
-  loading.value = false
-}
-
-// 初始加载
-getArticleList()
-
-/**
- * 每页条数变化时的处理
- * @param {number} size - 新的每页条数
- */
-const onSizeChange = (size: number) => {
-  params.value.pagenum = 1
-  params.value.pagesize = size
-  getArticleList()
-}
-
-/**
- * 当前页码变化时的处理
- * @param {number} page - 新的页码
- */
-const onCurrentChange = (page: number) => {
-  params.value.pagenum = page
-  getArticleList()
-}
-
-/**
- * 搜索按钮点击处理
- */
-const onSearch = () => {
-  params.value.pagenum = 1 // 搜索时重置回第一页
-  getArticleList()
-}
-
-/**
- * 重置按钮点击处理
- */
-const onReset = () => {
-  params.value.pagenum = 1
-  params.value.cate_id = ''
-  params.value.state = ''
-  getArticleList()
-}
 
 const articleEdit = ref() // ArticleEdit 组件实例引用
 
