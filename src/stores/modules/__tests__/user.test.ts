@@ -5,6 +5,7 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
+import type { UserInfo } from '@/types'
 
 // mock 用户信息接口 API，避免真实网络请求
 vi.mock('@/api/user', () => ({
@@ -79,7 +80,7 @@ describe('useUserStore 用户状态管理', () => {
       // 配置 mock 返回值
       vi.mocked(userGetInfoService).mockResolvedValue({
         data: { data: mockUserInfo }
-      } as any)
+      } as unknown as Awaited<ReturnType<typeof userGetInfoService>>)
 
       const store = useUserStore()
       await store.getUser()
@@ -98,7 +99,7 @@ describe('useUserStore 用户状态管理', () => {
       const store = useUserStore()
       await expect(store.getUser()).rejects.toThrow('401 Unauthorized')
       // 验证失败后 user 状态未被更新（仍为初始空对象）
-      expect(store.user).toEqual({} as any)
+      expect(store.user).toEqual({} as UserInfo)
     })
   })
 

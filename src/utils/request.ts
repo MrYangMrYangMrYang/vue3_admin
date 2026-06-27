@@ -46,7 +46,7 @@ instance.interceptors.request.use(
 
     return config
   },
-  (err: any) => Promise.reject(err)
+  (err: unknown) => Promise.reject(err)
 )
 
 instance.interceptors.response.use(
@@ -63,23 +63,28 @@ instance.interceptors.response.use(
     return Promise.reject(res.data)
   },
 
-  (err: any) => {
+  (err: unknown) => {
+    const axiosErr = err as {
+      code?: string
+      config?: InternalAxiosRequestConfig
+    }
     // 路由切换取消的请求：静默处理，不弹错误提示
-    if (err.code === 'ERR_CANCELED') {
+    if (axiosErr.code === 'ERR_CANCELED') {
       return Promise.reject(err)
     }
 
-    if (err.config) {
-      removePending(err.config)
+    if (axiosErr.config) {
+      removePending(axiosErr.config)
     }
 
     // GET 请求自动重试：网络错误（无 response）或 5xx 时指数退避（1s / 2s）
     // 仅 GET 请求，避免写操作重复提交；最多重试 MAX_RETRY 次
-    const config = err.config
+    const config = axiosErr.config
+    const response = (err as { response?: { status: number } }).response
     const isRetryable =
       config?.method === 'get' &&
       (config._retryCount ?? 0) < MAX_RETRY &&
-      (!err.response || err.response.status >= 500)
+      (!response || response.status >= 500)
 
     if (isRetryable) {
       config._retryCount = (config._retryCount ?? 0) + 1

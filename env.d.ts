@@ -27,6 +27,7 @@ interface ImportMetaEnv {
   readonly VITE_BASE_PATH: string
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface ImportMeta {
   readonly env: ImportMetaEnv
 }

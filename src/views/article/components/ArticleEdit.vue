@@ -100,7 +100,7 @@ async function imageUrlToFileObject(
       type: response.headers['content-type']
     })
     return file
-  } catch (_error: unknown) {
+  } catch {
     ElMessage.error('图片转换失败')
     return null
   }

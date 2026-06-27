@@ -8,7 +8,7 @@ const userStore = useUserStore()
 const imgUrl = ref(userStore.user.user_pic)
 const upload = ref()
 
-const onSelectFile = (uploadFile: any) => {
+const onSelectFile = (uploadFile: { raw: Blob }) => {
   const reader = new FileReader()
   reader.readAsDataURL(uploadFile.raw)
   reader.onload = () => {

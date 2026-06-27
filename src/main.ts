@@ -19,6 +19,7 @@ const app = createApp(App)
 // 开发环境输出结构化日志便于调试；生产环境可在此接入错误上报服务（Sentry / 自建埋点）
 app.config.errorHandler = (err, _instance, info) => {
   if (import.meta.env.DEV) {
+    // eslint-disable-next-line no-console
     console.error('[全局错误]', info, err)
   }
 }

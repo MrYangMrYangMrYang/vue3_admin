@@ -3,7 +3,7 @@
  */
 
 /** API 通用响应数据结构 */
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   /** 状态码：0 表示成功 */
   code: number
   /** 响应消息 */
