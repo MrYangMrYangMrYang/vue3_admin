@@ -53,12 +53,21 @@ const router = useRouter()
  */
 const handleCommand = async (key: string) => {
   if (key === 'logout') {
-    // 退出登录：弹出确认框
-    await ElMessageBox.confirm(t('common.logoutConfirm'), t('common.confirm'), {
-      type: 'warning',
-      confirmButtonText: t('common.confirm'),
-      cancelButtonText: t('common.cancel')
-    })
+    // 退出登录：弹出确认框，用户取消时静默返回（reject 不应冒泡到全局 errorHandler）
+    try {
+      await ElMessageBox.confirm(
+        t('common.logoutConfirm'),
+        t('common.confirm'),
+        {
+          type: 'warning',
+          confirmButtonText: t('common.confirm'),
+          cancelButtonText: t('common.cancel')
+        }
+      )
+    } catch {
+      // 用户点击取消，无需任何处理
+      return
+    }
     // 清除 Token 和用户信息
     userStore.removeToken()
     userStore.setUser({} as UserInfo)
