@@ -109,8 +109,10 @@ const login = async () => {
     loading.value = true
     const res = await userLoginService(formModel.value)
 
-    // 黑马 API 标准响应：res.data.data.token（类型已由 LoginResponseData 约束）
-    const token = res.data.data.token
+    // 黑马登录接口响应兼容：优先 res.data.data.token，回退 res.data.token
+    // 实际响应中 token 可能位于 data 包裹层或顶层，用可选链安全提取
+    const resData = res.data as { data?: { token?: string }; token?: string }
+    const token = resData.data?.token ?? resData.token
     if (!token) {
       throw new Error('登录响应中未获取到 Token')
     }
