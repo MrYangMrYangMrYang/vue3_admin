@@ -15,6 +15,9 @@ import { formatTime } from '@/utils/format'
 import { useTable } from '@/composables'
 import type { ArticleDetail } from '@/types'
 
+/** 组件名（供 keep-alive include 匹配，缓存列表页状态） */
+defineOptions({ name: 'article-manage' })
+
 /**
  * 分页列表管理
  * @description useTable 自动管理 list/total/loading/params 与分页/搜索/重置逻辑

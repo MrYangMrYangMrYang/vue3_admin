@@ -51,5 +51,9 @@ export default {
   'common.logoutConfirm': '你确认要进行退出么',
   'common.logoutSuccess': '已安全退出登录',
   'common.deleteConfirm': '删除确认',
-  'common.deleteSuccess': '删除成功'
+  'common.deleteSuccess': '删除成功',
+  'common.home': '首页',
+  'common.notFound': '页面走丢了',
+  'common.notFoundDesc': '您访问的页面不存在或已被移除',
+  'common.backHome': '返回首页'
 }

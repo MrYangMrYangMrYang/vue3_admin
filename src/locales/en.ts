@@ -51,5 +51,10 @@ export default {
   'common.logoutConfirm': 'Are you sure to log out?',
   'common.logoutSuccess': 'Logged out safely',
   'common.deleteConfirm': 'Delete Confirmation',
-  'common.deleteSuccess': 'Deleted'
+  'common.deleteSuccess': 'Deleted',
+  'common.home': 'Home',
+  'common.notFound': 'Page Lost',
+  'common.notFoundDesc':
+    'The page you visited does not exist or has been removed',
+  'common.backHome': 'Back to Home'
 }

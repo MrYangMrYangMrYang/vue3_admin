@@ -83,20 +83,26 @@ const router = createRouter({
          * 文章管理页面
          * @route /article/manage
          * @description 文章的增删改查操作界面
+         * @keep-alive 列表页缓存，切换回来保留分页与搜索状态
          */
         {
           path: '/article/manage',
-          component: () => import('@/views/article/ArticleManage.vue')
+          name: 'article-manage',
+          component: () => import('@/views/article/ArticleManage.vue'),
+          meta: { title: 'menu.articleManage' }
         },
 
         /**
          * 文章分类管理页面
          * @route /article/channel
          * @description 文章分类/频道的 CRUD 操作
+         * @keep-alive 列表页缓存
          */
         {
           path: '/article/channel',
-          component: () => import('@/views/article/ArticleChannel.vue')
+          name: 'article-channel',
+          component: () => import('@/views/article/ArticleChannel.vue'),
+          meta: { title: 'menu.articleChannel' }
         },
 
         /**
@@ -106,7 +112,9 @@ const router = createRouter({
          */
         {
           path: '/user/profile',
-          component: () => import('@/views/user/UserProfile.vue')
+          name: 'user-profile',
+          component: () => import('@/views/user/UserProfile.vue'),
+          meta: { title: 'menu.profile' }
         },
 
         /**
@@ -116,7 +124,9 @@ const router = createRouter({
          */
         {
           path: '/user/avatar',
-          component: () => import('@/views/user/UserAvatar.vue')
+          name: 'user-avatar',
+          component: () => import('@/views/user/UserAvatar.vue'),
+          meta: { title: 'menu.avatar' }
         },
 
         /**
@@ -126,7 +136,21 @@ const router = createRouter({
          */
         {
           path: '/user/password',
-          component: () => import('@/views/user/UserPassword.vue')
+          name: 'user-password',
+          component: () => import('@/views/user/UserPassword.vue'),
+          meta: { title: 'menu.password' }
+        },
+
+        /**
+         * 404 兜底路由
+         * @description 匹配所有未定义路径，显示自定义 404 页
+         * 必须放在 children 最后
+         */
+        {
+          path: '/:pathMatch(.*)*',
+          name: 'not-found',
+          component: () => import('@/views/NotFound.vue'),
+          meta: { title: 'common.notFound' }
         }
       ] as RouteRecordRaw[]
     }
@@ -165,7 +189,7 @@ router.beforeEach((to) => {
    * 条件：无 Token 且 目标不是登录页
    */
   if (!useStore.token && to.path !== '/login') {
-    return '/login'  // 重定向到登录页
+    return '/login' // 重定向到登录页
   }
 })
 

@@ -26,6 +26,7 @@ import { useRouter } from 'vue-router'
 import { useTheme } from '@/composables/useTheme'
 import { useI18n } from '@/composables/useI18n'
 import type { Locale } from '@/composables/useI18n'
+import AppBreadcrumb from '@/components/AppBreadcrumb.vue'
 
 const isCollapse = ref(false) // 侧边栏折叠状态
 const userStore = useUserStore()
@@ -142,13 +143,20 @@ const onLocaleChange = (l: Locale) => setLocale(l)
             </el-button>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item command="zh">{{ t('locale.zh') }}</el-dropdown-item>
-                <el-dropdown-item command="en">{{ t('locale.en') }}</el-dropdown-item>
+                <el-dropdown-item command="zh">{{
+                  t('locale.zh')
+                }}</el-dropdown-item>
+                <el-dropdown-item command="en">{{
+                  t('locale.en')
+                }}</el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
           <!-- 主题切换 -->
-          <el-tooltip :content="isDark ? t('theme.light') : t('theme.dark')" placement="bottom">
+          <el-tooltip
+            :content="isDark ? t('theme.light') : t('theme.dark')"
+            placement="bottom"
+          >
             <el-button text class="icon-btn" @click="toggleTheme">
               <el-icon :size="18">
                 <component :is="isDark ? Sunny : Moon" />
@@ -181,8 +189,14 @@ const onLocaleChange = (l: Locale) => setLocale(l)
         </div>
       </el-header>
       <el-main>
-        <!-- 二级路由出口 -->
-        <router-view></router-view>
+        <!-- 面包屑导航 -->
+        <AppBreadcrumb class="breadcrumb-bar" />
+        <!-- 二级路由出口（keep-alive 缓存列表页，保留分页与搜索状态） -->
+        <router-view v-slot="{ Component }">
+          <keep-alive :include="['article-manage', 'article-channel']">
+            <component :is="Component" />
+          </keep-alive>
+        </router-view>
       </el-main>
       <el-footer>大事件 ©2025 Created by MrYang</el-footer>
     </el-container>
@@ -265,6 +279,9 @@ const onLocaleChange = (l: Locale) => setLocale(l)
     justify-content: center;
     font-size: 14px;
     color: var(--el-text-color-secondary, #666);
+  }
+  .breadcrumb-bar {
+    margin-bottom: 16px;
   }
 }
 </style>

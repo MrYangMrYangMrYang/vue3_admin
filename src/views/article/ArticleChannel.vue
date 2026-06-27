@@ -9,6 +9,9 @@ import { artGetChannelsService, artDelChannelService } from '@/api/article'
 import ChannelEdit from './components/ChannelEdit.vue'
 import { ArticleChannel as ArticleChannelType } from '@/types'
 
+/** 组件名（供 keep-alive include 匹配，缓存列表页状态） */
+defineOptions({ name: 'article-channel' })
+
 const channelList = ref<ArticleChannelType[]>([])
 const loading = ref(true) // 初始为 true，避免空状态闪烁
 

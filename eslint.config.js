@@ -71,6 +71,20 @@ export default defineConfig([
   ...pluginVue.configs['flat/essential'],
   js.configs.recommended,
 
+  // ==================== 5.1 Vue 文件 TS 解析器 ====================
+  /**
+   * .vue 文件的 <script lang="ts"> 块需用 @typescript-eslint/parser 解析，
+   * 否则 espree 不认识 import type / as / defineOptions 等 TS 语法
+   */
+  {
+    files: ['**/*.vue'],
+    languageOptions: {
+      parserOptions: {
+        parser: tseslint.parser
+      }
+    }
+  },
+
   // ==================== 6. 自定义规则配置 ====================
   {
     rules: {
