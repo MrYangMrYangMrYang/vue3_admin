@@ -35,6 +35,13 @@ import pinia from './stores'
 import '@/assets/main.scss'
 
 /**
+ * Element Plus 暗色主题 CSS 变量
+ * @description 提供 html.dark 作用域下的 Element Plus 组件暗色变量覆盖
+ * @see {@link https://element-plus.org/en/guide/dark-mode.html}
+ */
+import 'element-plus/theme-chalk/dark/css-vars.css'
+
+/**
  * 创建 Vue 应用实例
  * @type {App<Element>}
  * @description 使用根组件 App.vue 创建应用

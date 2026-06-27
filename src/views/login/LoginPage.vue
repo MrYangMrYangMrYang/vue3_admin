@@ -14,6 +14,9 @@ import { ref, watch, computed, onMounted, nextTick } from 'vue'
 import { useUserStore } from '@/stores'
 import { useRouter } from 'vue-router'
 import AnimatedCharacters from '@/components/AnimatedCharacters.vue'
+import { useI18n } from '@/composables/useI18n'
+
+const { t } = useI18n()
 
 const formModel = ref<RegisterData & LoginData>({ username: '', password: '', repassword: '' })
 const rememberMe = ref(false) // 记住我复选框状态
@@ -88,7 +91,7 @@ const register = async () => {
     await form.value.validate()
     loading.value = true
     await userRegisterService(formModel.value)
-    ElMessage.success('注册成功')
+    ElMessage.success(t('login.registerSuccess'))
     isRegister.value = false // 注册成功后自动切换到登录模式
   } catch {
     // 校验失败或接口报错
@@ -126,14 +129,14 @@ const login = async () => {
       localStorage.removeItem('big-event-username')
     }
 
-    ElMessage.success('登录成功')
+    ElMessage.success(t('login.success'))
 
     // 使用 nextTick 确保 Token 持久化后再跳转
     await nextTick()
     router.push('/article/channel') // 跳转到文章分类页（有数据的主页面）
   } catch (error: unknown) {
     // 登录失败处理 - 显示具体错误信息
-    const message = error instanceof Error ? error.message : '登录失败，请重试'
+    const message = error instanceof Error ? error.message : t('login.failed')
     ElMessage.error(message)
   } finally {
     loading.value = false
@@ -220,20 +223,20 @@ const onPasswordFocus = () => {
               />
             </svg>
           </div>
-          <span>大事件管理系统</span>
+          <span>{{ t('login.brand') }}</span>
         </div>
 
         <div class="formHeader">
           <transition name="fade-slide" mode="out-in">
             <div :key="isRegister ? 'register' : 'login'">
               <h1 class="formTitle">
-                {{ isRegister ? '创建新账号' : '登录到工作台' }}
+                {{ isRegister ? t('login.titleRegister') : t('login.title') }}
               </h1>
               <p class="formSubtitle">
                 {{
                   isRegister
-                    ? '加入我们，管理您的精彩事件'
-                    : '接入大事件管理系统'
+                    ? t('login.subtitleRegister')
+                    : t('login.subtitle')
                 }}
               </p>
             </div>
@@ -248,22 +251,22 @@ const onPasswordFocus = () => {
           autocomplete="off"
           class="form"
         >
-          <div class="fieldLabel">账号</div>
+          <div class="fieldLabel">{{ t('login.account') }}</div>
           <el-form-item prop="username">
             <el-input
               v-model="formModel.username"
               :prefix-icon="User"
-              placeholder="输入您的用户名"
+              :placeholder="t('login.accountPlaceholder')"
             ></el-input>
           </el-form-item>
 
-          <div class="fieldLabel">密码</div>
+          <div class="fieldLabel">{{ t('login.password') }}</div>
           <el-form-item prop="password">
             <el-input
               v-model="formModel.password"
               :prefix-icon="Lock"
               :type="showPassword ? 'text' : 'password'"
-              placeholder="输入您的密码"
+              :placeholder="t('login.passwordPlaceholder')"
               @focus="onPasswordFocus"
               @blur="isTyping = false"
             >
@@ -280,13 +283,13 @@ const onPasswordFocus = () => {
 
           <transition name="fade-height">
             <div v-if="isRegister">
-              <div class="fieldLabel">确认密码</div>
+              <div class="fieldLabel">{{ t('login.confirmPassword') }}</div>
               <el-form-item prop="repassword">
                 <el-input
                   v-model="formModel.repassword"
                   :prefix-icon="Lock"
                   type="password"
-                  placeholder="请再次输入密码"
+                  :placeholder="t('login.confirmPlaceholder')"
                   @focus="isTyping = true"
                   @blur="isTyping = false"
                 ></el-input>
@@ -296,8 +299,8 @@ const onPasswordFocus = () => {
 
           <transition name="fade-height">
             <div v-if="!isRegister" class="flex-between">
-              <el-checkbox v-model="rememberMe">记住我</el-checkbox>
-              <el-link type="primary" :underline="false">忘记密码？</el-link>
+              <el-checkbox v-model="rememberMe">{{ t('login.rememberMe') }}</el-checkbox>
+              <el-link type="primary" :underline="false">{{ t('login.forgotPassword') }}</el-link>
             </div>
           </transition>
 
@@ -310,7 +313,7 @@ const onPasswordFocus = () => {
             >
               <transition name="fade-slide-mini" mode="out-in">
                 <span :key="isRegister ? 'register' : 'login'">{{
-                  isRegister ? '注册' : '登录'
+                  isRegister ? t('login.register') : t('login.submit')
                 }}</span>
               </transition>
             </el-button>
@@ -320,9 +323,9 @@ const onPasswordFocus = () => {
         <div class="signupRow">
           <transition name="fade-slide-mini" mode="out-in">
             <div :key="isRegister ? 'register' : 'login'">
-              {{ isRegister ? '已有账号？' : '暂无账号？' }}
+              {{ isRegister ? t('login.hasAccount') : t('login.noAccount') }}
               <span class="signupLink" @click="isRegister = !isRegister">
-                {{ isRegister ? '立即登录' : '立即注册' }}
+                {{ isRegister ? t('login.loginNow') : t('login.registerNow') }}
               </span>
             </div>
           </transition>
@@ -337,7 +340,7 @@ const onPasswordFocus = () => {
   min-height: 100vh;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  background-color: #fff;
+  background-color: var(--el-bg-color, #fff);
 }
 
 @media (max-width: 1024px) {
@@ -485,7 +488,7 @@ const onPasswordFocus = () => {
   align-items: center;
   justify-content: center;
   padding: 32px;
-  background: #ffffff;
+  background: var(--el-bg-color, #ffffff);
 }
 
 .formWrapper {
@@ -529,14 +532,14 @@ const onPasswordFocus = () => {
   font-size: 26px;
   font-weight: 700;
   letter-spacing: -0.02em;
-  color: #0f172a;
+  color: var(--el-text-color-primary, #0f172a);
   margin: 0 0 10px 0;
   line-height: 1.3;
 }
 
 .formSubtitle {
   font-size: 14px;
-  color: #64748b;
+  color: var(--el-text-color-secondary, #64748b);
   margin: 0;
   line-height: 1.6;
 }
@@ -547,8 +550,8 @@ const onPasswordFocus = () => {
 
 :deep(.el-input__wrapper) {
   height: 48px;
-  background: #f8fafc !important;
-  border: 1px solid #e2e8f0 !important;
+  background: var(--el-fill-color-light, #f8fafc) !important;
+  border: 1px solid var(--el-border-color, #e2e8f0) !important;
   border-radius: 10px !important;
   box-shadow: none !important;
   transition: all 0.2s !important;
@@ -561,14 +564,14 @@ const onPasswordFocus = () => {
 :deep(.el-input__wrapper.is-focus) {
   border-color: var(--primary-color) !important;
   box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1) !important;
-  background: #ffffff !important;
+  background: var(--el-bg-color, #ffffff) !important;
   transform: scale(1.01);
 }
 
 .fieldLabel {
   font-size: 13px;
   font-weight: 500;
-  color: #475569;
+  color: var(--el-text-color-regular, #475569);
   margin-bottom: 6px;
   letter-spacing: 0.2px;
 }
@@ -665,7 +668,7 @@ const onPasswordFocus = () => {
 .signupRow {
   text-align: center;
   font-size: 13px;
-  color: #64748b;
+  color: var(--el-text-color-secondary, #64748b);
   margin-top: 28px;
 }
 

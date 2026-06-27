@@ -6,16 +6,33 @@
   --transition-normal: 0.3s ease;
   --border-radius-base: 8px;
   --bg-color-page: #f5f7fa;
+  --text-color-primary: #303133;
+  --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.05);
+  --shadow-card-hover: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+/**
+ * 暗色模式变量覆盖
+ * @description html.dark 作用域下覆盖项目自定义变量，
+ * Element Plus 组件变量由 dark/css-vars.css 自动处理
+ */
+html.dark {
+  --bg-color-page: #141414;
+  --text-color-primary: #e5eaf3;
+  --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.3);
+  --shadow-card-hover: 0 6px 16px rgba(0, 0, 0, 0.4);
 }
 
 body {
   margin: 0;
   background-color: var(--bg-color-page);
+  color: var(--text-color-primary);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
     'Helvetica Neue', Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   scroll-behavior: smooth;
+  transition: background-color var(--transition-normal), color var(--transition-normal);
 }
 
 /* 统一卡片内边距与圆角 */
