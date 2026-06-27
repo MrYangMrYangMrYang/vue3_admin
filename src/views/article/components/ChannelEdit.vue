@@ -1,10 +1,4 @@
-<!-- 局部组件：文章分类的编辑和添加子组件(dialog 组件)  -->
 <script setup lang="ts">
-/**
- * 文章分类编辑/添加弹窗组件
- * 用于处理分类的创建和更新
- */
-// nextTick 是 Vue 提供的一个方法，用于在 DOM 更新完成后执行回调函数。它解决了数据更新后，DOM 尚未同步更新的问题，确保操作的是最新的 DOM。
 import { ref, nextTick } from 'vue'
 import { artEditChannelService, artAddChannelService } from '@/api/article'
 import { ChannelFormData } from '@/types'
@@ -20,7 +14,6 @@ const open = async (obj: ChannelFormData) => {
   form.value?.clearValidate()
 }
 
-// 表单校验规则
 const rules = {
   cate_name: [
     { required: true, message: '请输入分类名称', trigger: 'blur' },
@@ -40,37 +33,26 @@ const rules = {
   ]
 }
 
-// 定义组件自定义事件
 const emit = defineEmits(['success'])
 
-/**
- * 表单提交处理
- */
 const onSubmit = async () => {
-  // 提交前的预校验
   await form.value.validate()
   if (formModel.value.id) {
-    // 编辑分类
     await artEditChannelService(formModel.value)
     ElMessage.success('编辑成功')
   } else {
-    // 添加分类
     await artAddChannelService(formModel.value)
     ElMessage.success('添加成功')
   }
-  // 关闭弹窗并通知父组件刷新列表
   dialogVisible.value = false
   emit('success')
 }
 
-// 暴露 open 方法给父组件调用
 defineExpose({
   open
 })
 </script>
 
-<!-- Dialog 组件需要设置 model-value / v-model 属性，它接收 Boolean，当为 true 时显示 Dialog。 -->
-<!-- 组件分为两个部分：body 和 footer，footer 为一个具名插槽。 title 属性用于定义标题，它是可选的，默认值为空。 -->
 <template>
   <el-dialog
     v-model="dialogVisible"

@@ -382,7 +382,7 @@ const baseURL = import.meta.env.VITE_API_BASE_URL
 
 API 地址已统一改为 `https://`，原因：
 
-- 黑马 API 服务端会强制将 HTTP 重定向到 HTTPS
+- 后端 API 服务端会强制将 HTTP 重定向到 HTTPS
 - HTTP → HTTPS 重定向会触发 CORS 预检失败（跨协议重定向被浏览器拦截）
 - 直接使用 `https://` 可避免 308/301 重定向，省去不必要的预检请求
 
@@ -677,7 +677,7 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
 - [GSAP](https://greensock.com/gsap/) - 专业 Web 动画平台
 - [Axios](https://axios-http.com/) - 基于 Promise 的 HTTP 客户端
 
-特别感谢 **黑马程序员 (itheima)** 提供的后端 API 服务！
+特别感谢公开的后端 API 服务对本项目的支持！
 
 ---
 

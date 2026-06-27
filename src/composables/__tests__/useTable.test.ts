@@ -6,7 +6,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { useTable } from '../useTable'
 
-/** 模拟黑马 API 标准响应结构 { data: { data: { data: [], total: N } } } */
+/** 模拟后端 API 标准响应结构 { data: { data: { data: [], total: N } } } */
 const mockResponse = {
   data: {
     data: {

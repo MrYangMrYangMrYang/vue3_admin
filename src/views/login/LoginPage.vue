@@ -1,12 +1,4 @@
 <script setup lang="ts">
-/**
- * 登录与注册页面组件
- * 包含：
- * 1. 登录与注册模式切换
- * 2. 表单校验（用户名、密码、确认密码）
- * 3. 记住我功能（使用 localStorage）
- * 4. 动态背景与人物交互动画
- */
 import { userRegisterService, userLoginService } from '@/api/user'
 import { RegisterData, LoginData } from '@/types'
 import { User, Lock, View, Hide } from '@element-plus/icons-vue'
@@ -18,17 +10,19 @@ import { useI18n } from '@/composables/useI18n'
 
 const { t } = useI18n()
 
-const formModel = ref<RegisterData & LoginData>({ username: '', password: '', repassword: '' })
-const rememberMe = ref(false) // 记住我复选框状态
+const formModel = ref<RegisterData & LoginData>({
+  username: '',
+  password: '',
+  repassword: ''
+})
+const rememberMe = ref(false)
 
-// 动画状态控制
-const isTyping = ref(false) // 是否正在输入密码（触发对视动画）
-const showPassword = ref(false) // 是否明文显示密码（触发偷看动画）
+// 动画状态：isTyping 触发对视动画，showPassword 触发偷看动画
+const isTyping = ref(false)
+const showPassword = ref(false)
 const passwordLength = computed(() => formModel.value.password.length)
 
-// --- 生命周期 ---
 onMounted(() => {
-  // 页面加载时，尝试获取记住的用户名
   const savedUsername = localStorage.getItem('big-event-username')
   if (savedUsername) {
     formModel.value.username = savedUsername
@@ -36,7 +30,6 @@ onMounted(() => {
   }
 })
 
-// --- 表单校验规则 ---
 const rules = {
   username: [
     { required: true, message: '请输入用户名', trigger: 'blur' },
@@ -64,7 +57,6 @@ const rules = {
       trigger: 'blur'
     },
     {
-      // 自定义校验器：匹配两次输入密码是否一致
       validator: (_rule: any, value: string, callback: Function) => {
         if (value !== formModel.value.password) {
           callback(new Error('两次输入密码不一致'))
@@ -77,22 +69,17 @@ const rules = {
   ]
 }
 
-const form = ref() // 表单 DOM 引用
-const isRegister = ref(false) // 当前是否为注册模式
-const loading = ref(false) // 提交按钮加载状态
+const form = ref()
+const isRegister = ref(false)
+const loading = ref(false)
 
-// --- 逻辑方法 ---
-
-/**
- * 注册逻辑
- */
 const register = async () => {
   try {
     await form.value.validate()
     loading.value = true
     await userRegisterService(formModel.value)
     ElMessage.success(t('login.registerSuccess'))
-    isRegister.value = false // 注册成功后自动切换到登录模式
+    isRegister.value = false
   } catch {
     // 校验失败或接口报错
   } finally {
@@ -103,17 +90,13 @@ const register = async () => {
 const userStore = useUserStore()
 const router = useRouter()
 
-/**
- * 登录逻辑
- */
 const login = async () => {
   try {
     await form.value.validate()
     loading.value = true
     const res = await userLoginService(formModel.value)
 
-    // 黑马登录接口响应兼容：优先 res.data.data.token，回退 res.data.token
-    // 实际响应中 token 可能位于 data 包裹层或顶层，用可选链安全提取
+    // 响应兼容：token 可能位于 data 包裹层或顶层，用可选链安全提取
     const resData = res.data as { data?: { token?: string }; token?: string }
     const token = resData.data?.token ?? resData.token
     if (!token) {
@@ -122,7 +105,6 @@ const login = async () => {
 
     userStore.setToken(token)
 
-    // 处理“记住我”本地存储逻辑
     if (rememberMe.value) {
       localStorage.setItem('big-event-username', formModel.value.username)
     } else {
@@ -131,11 +113,10 @@ const login = async () => {
 
     ElMessage.success(t('login.success'))
 
-    // 使用 nextTick 确保 Token 持久化后再跳转
+    // nextTick 确保 Token 持久化后再跳转
     await nextTick()
-    router.push('/article/channel') // 跳转到文章分类页（有数据的主页面）
+    router.push('/article/channel')
   } catch (error: unknown) {
-    // 登录失败处理 - 显示具体错误信息
     const message = error instanceof Error ? error.message : t('login.failed')
     ElMessage.error(message)
   } finally {
@@ -143,16 +124,11 @@ const login = async () => {
   }
 }
 
-/**
- * 切换模式时重置表单内容和校验状态
- */
+// 切换模式时重置表单内容和校验状态
 watch(isRegister, () => {
   form.value.resetFields()
 })
 
-/**
- * 密码框聚焦处理，用于触发交互动画
- */
 const onPasswordFocus = () => {
   isTyping.value = true
 }
@@ -234,9 +210,7 @@ const onPasswordFocus = () => {
               </h1>
               <p class="formSubtitle">
                 {{
-                  isRegister
-                    ? t('login.subtitleRegister')
-                    : t('login.subtitle')
+                  isRegister ? t('login.subtitleRegister') : t('login.subtitle')
                 }}
               </p>
             </div>
@@ -299,8 +273,12 @@ const onPasswordFocus = () => {
 
           <transition name="fade-height">
             <div v-if="!isRegister" class="flex-between">
-              <el-checkbox v-model="rememberMe">{{ t('login.rememberMe') }}</el-checkbox>
-              <el-link type="primary" :underline="false">{{ t('login.forgotPassword') }}</el-link>
+              <el-checkbox v-model="rememberMe">{{
+                t('login.rememberMe')
+              }}</el-checkbox>
+              <el-link type="primary" :underline="false">{{
+                t('login.forgotPassword')
+              }}</el-link>
             </div>
           </transition>
 

@@ -25,7 +25,7 @@
 
 #### 修复
 
-- 修复黑马 API HTTP→HTTPS 301 重定向导致的 CORS 预检失败（`VITE_API_BASE_URL` 改为 `https://`）
+- 修复后端 API HTTP→HTTPS 301 重定向导致的 CORS 预检失败（`VITE_API_BASE_URL` 改为 `https://`）
 - 修复登录 Token 提取崩溃：兼容 `res.data.data.token` 与 `res.data.token` 两种响应结构
 - 修复取消退出登录时触发全局 errorHandler 显示"页面渲染异常"（`ElMessageBox.confirm` reject 未捕获）
 - 修复 eslint 配置缺陷：`.vue` 文件 `<script lang="ts">` 缺少 TS 解析器配置

@@ -1,8 +1,4 @@
 <script setup lang="ts">
-/**
- * 修改密码页面
- * 提供原密码校验、新密码与原密码差异校验以及确认密码一致性校验
- */
 import { ref } from 'vue'
 import { userUpdatePasswordService } from '@/api/user'
 import { UpdatePasswordData } from '@/types'
@@ -33,7 +29,6 @@ const checkSameAsNewPwd = (_rule: any, value: string, callback: Function) => {
   }
 }
 
-// 表单校验规则
 const rules = ref({
   old_pwd: [
     { required: true, message: '请输入原密码', trigger: 'blur' },
@@ -59,18 +54,15 @@ const rules = ref({
 
 const userStore = useUserStore()
 const router = useRouter()
-const loading = ref(false) // 提交按钮加载状态
+const loading = ref(false)
 
-/**
- * 提交修改密码请求
- */
 const submitForm = async () => {
   try {
     await form.value.validate()
     loading.value = true
     await userUpdatePasswordService(pwdForm.value)
     ElMessage.success({ message: '密码修改成功', duration: 1500 })
-    // 修改成功后，清除 token 和用户信息并跳转至登录页重新登录
+    // 修改成功后清除 token 和用户信息，跳转至登录页重新登录
     userStore.setToken('')
     userStore.setUser({} as UserInfo)
     router.push('/login')
@@ -81,9 +73,6 @@ const submitForm = async () => {
   }
 }
 
-/**
- * 重置表单内容及校验状态
- */
 const resetForm = () => {
   form.value.resetFields()
 }

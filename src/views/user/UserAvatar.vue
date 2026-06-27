@@ -1,16 +1,12 @@
 <script setup lang="ts">
-/**
- * 更换头像页面
- * 支持选择图片预览并上传更新用户头像
- */
 import { ref } from 'vue'
 import { Plus, Upload } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores'
 import { userUpdateAvatarService } from '@/api/user'
 
 const userStore = useUserStore()
-const imgUrl = ref(userStore.user.user_pic) // 当前头像预览图
-const upload = ref() // el-upload 组件实例
+const imgUrl = ref(userStore.user.user_pic)
+const upload = ref()
 
 const onSelectFile = (uploadFile: any) => {
   const reader = new FileReader()
@@ -20,17 +16,13 @@ const onSelectFile = (uploadFile: any) => {
   }
 }
 
-const loading = ref(false) // 上传按钮加载状态
+const loading = ref(false)
 
-/**
- * 确认上传头像
- */
 const onUpdateAvatar = async () => {
   try {
     loading.value = true
-    // 调用接口更新头像 (后端接收 base64 字符串)
+    // 后端接收 base64 字符串
     await userUpdateAvatarService(imgUrl.value ?? '')
-    // 更新成功后刷新用户信息
     await userStore.getUser()
     ElMessage.success({ message: '头像更新成功', duration: 1500 })
   } catch {
@@ -56,7 +48,6 @@ const onUpdateAvatar = async () => {
 
     <br />
 
-    <!-- 触发文件选择 -->
     <el-button
       @click="upload.$el.querySelector('input').click()"
       type="primary"
@@ -64,7 +55,6 @@ const onUpdateAvatar = async () => {
       size="large"
       >选择图片</el-button
     >
-    <!-- 触发上传操作 -->
     <el-button
       @click="onUpdateAvatar"
       type="success"

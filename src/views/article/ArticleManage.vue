@@ -1,11 +1,4 @@
 <script setup lang="ts">
-/**
- * 文章管理页面
- * 包含文章列表展示、搜索过滤、分页查询以及文章的添加、编辑、删除操作
- *
- * @remarks
- * 使用 useTable composable 封装分页列表逻辑，消除重复样板代码
- */
 import { ref } from 'vue'
 import { Delete, Edit } from '@element-plus/icons-vue'
 import ChannelSelect from './components/ChannelSelect.vue'
@@ -18,10 +11,7 @@ import type { ArticleDetail } from '@/types'
 /** 组件名（供 keep-alive include 匹配，缓存列表页状态） */
 defineOptions({ name: 'article-manage' })
 
-/**
- * 分页列表管理
- * @description useTable 自动管理 list/total/loading/params 与分页/搜索/重置逻辑
- */
+// useTable 自动管理 list/total/loading/params 与分页/搜索/重置逻辑
 const {
   list: articleList,
   total,
@@ -40,27 +30,16 @@ const {
   initialPageSize: 5
 })
 
-const articleEdit = ref() // ArticleEdit 组件实例引用
+const articleEdit = ref()
 
-/**
- * 添加文章
- */
 const onAddArticle = () => {
   articleEdit.value.open({})
 }
 
-/**
- * 编辑文章
- * @param {ArticleDetail} row - 当前行数据
- */
 const onEditArticle = (row: ArticleDetail) => {
   articleEdit.value.open(row)
 }
 
-/**
- * 删除文章
- * @param {ArticleDetail} row - 当前行数据
- */
 const onDeleteArticle = async (row: ArticleDetail) => {
   try {
     await ElMessageBox.confirm(
@@ -80,13 +59,9 @@ const onDeleteArticle = async (row: ArticleDetail) => {
   }
 }
 
-/** 表格选中行（批量删除用） */
 const selectedRows = ref<ArticleDetail[]>([])
 
-/**
- * 批量删除选中文章
- * @description 黑马 API 无批量删除接口，用 Promise.allSettled 并发调用单个删除
- */
+// 后端 API 无批量删除接口，用 Promise.allSettled 并发调用单个删除
 const onBatchDelete = async () => {
   if (selectedRows.value.length === 0) return
   try {
@@ -99,7 +74,6 @@ const onBatchDelete = async () => {
         type: 'warning'
       }
     )
-    // 并发删除，allSettled 统计成功/失败
     const results = await Promise.allSettled(
       selectedRows.value.map((row) => artDelService(row.id))
     )
@@ -117,17 +91,12 @@ const onBatchDelete = async () => {
   }
 }
 
-/**
- * 子组件操作成功后的回调
- * @param {string} type - 操作类型 (add/edit)
- */
 const onSuccess = (type: string) => {
   if (type === 'add') {
-    // 添加成功，计算并跳转到最后一页
+    // 添加成功，跳转到最后一页
     const lastPage = Math.ceil((total.value + 1) / params.value.pagesize)
     params.value.pagenum = lastPage
   }
-  // 重新加载当前页数据
   getArticleList()
 }
 </script>
@@ -137,10 +106,8 @@ const onSuccess = (type: string) => {
     <template #extra>
       <el-button type="primary" @click="onAddArticle">添加文章</el-button>
     </template>
-    <!-- 封装的抽屉组件 -->
     <ArticleEdit ref="articleEdit" @success="onSuccess"></ArticleEdit>
 
-    <!-- 表单区域 -->
     <el-form inline class="search-form">
       <el-form-item label="文章分类:">
         <ChannelSelect v-model="params.cate_id" width="200px"></ChannelSelect>
@@ -161,7 +128,6 @@ const onSuccess = (type: string) => {
       </el-form-item>
     </el-form>
 
-    <!-- 批量操作工具栏（选中行时显示） -->
     <div class="batch-bar" v-if="selectedRows.length > 0">
       <span class="batch-count">已选择 {{ selectedRows.length }} 项</span>
       <el-button type="danger" :icon="Delete" @click="onBatchDelete">
@@ -169,7 +135,6 @@ const onSuccess = (type: string) => {
       </el-button>
     </div>
 
-    <!-- 表格区域 -->
     <el-table
       :data="articleList"
       v-loading="loading"
@@ -224,7 +189,6 @@ const onSuccess = (type: string) => {
       </el-table-column>
     </el-table>
 
-    <!-- 分页区域 -->
     <el-pagination
       v-model:current-page="params.pagenum"
       v-model:page-size="params.pagesize"

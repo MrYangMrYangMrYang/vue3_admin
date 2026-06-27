@@ -1,9 +1,4 @@
 <script setup lang="ts">
-/**
- * 后台布局容器组件
- * 包含侧边栏菜单、顶部导航头、用户信息展示、以及二级路由出口
- * 支持暗色/亮色主题切换与中英文语言切换
- */
 import {
   Management,
   Promotion,
@@ -28,15 +23,13 @@ import { useI18n } from '@/composables/useI18n'
 import type { Locale } from '@/composables/useI18n'
 import AppBreadcrumb from '@/components/AppBreadcrumb.vue'
 
-const isCollapse = ref(false) // 侧边栏折叠状态
+const isCollapse = ref(false)
 const userStore = useUserStore()
 
-// 主题与语言
 const { isDark, toggleTheme } = useTheme()
 const { t, locale, setLocale } = useI18n()
 
 onMounted(async () => {
-  // 页面加载后，自动获取最新的用户信息
   // 失败时（如 401）由 request 拦截器统一处理跳转，此处静默捕获避免未处理 Promise 拒绝
   try {
     await userStore.getUser()
@@ -47,13 +40,9 @@ onMounted(async () => {
 
 const router = useRouter()
 
-/**
- * 处理顶部下拉菜单的点击命令
- * @param {string} key - 命令关键字 (profile/avatar/password/logout)
- */
 const handleCommand = async (key: string) => {
   if (key === 'logout') {
-    // 退出登录：弹出确认框，用户取消时静默返回（reject 不应冒泡到全局 errorHandler）
+    // 用户取消时静默返回（reject 不应冒泡到全局 errorHandler）
     try {
       await ElMessageBox.confirm(
         t('common.logoutConfirm'),
@@ -65,27 +54,21 @@ const handleCommand = async (key: string) => {
         }
       )
     } catch {
-      // 用户点击取消，无需任何处理
       return
     }
-    // 清除 Token 和用户信息
     userStore.removeToken()
     userStore.setUser({} as UserInfo)
-    // 退出登录成功提示
     ElMessage.success({
       message: t('common.logoutSuccess'),
       duration: 1500,
       grouping: true
     })
-    // 跳转到登录页
     router.push('/login')
   } else {
-    // 跳转到对应的个人中心子页面
     router.push(`/user/${key}`)
   }
 }
 
-/** 切换语言 */
 const onLocaleChange = (l: Locale) => setLocale(l)
 </script>
 
@@ -145,7 +128,6 @@ const onLocaleChange = (l: Locale) => setLocale(l)
           </div>
         </div>
         <div class="header-actions">
-          <!-- 语言切换 -->
           <el-dropdown placement="bottom-end" @command="onLocaleChange">
             <el-button text class="icon-btn">
               {{ locale === 'zh' ? '中' : 'EN' }}
@@ -161,7 +143,6 @@ const onLocaleChange = (l: Locale) => setLocale(l)
               </el-dropdown-menu>
             </template>
           </el-dropdown>
-          <!-- 主题切换 -->
           <el-tooltip
             :content="isDark ? t('theme.light') : t('theme.dark')"
             placement="bottom"
@@ -172,7 +153,6 @@ const onLocaleChange = (l: Locale) => setLocale(l)
               </el-icon>
             </el-button>
           </el-tooltip>
-          <!-- 用户下拉 -->
           <el-dropdown placement="bottom-end" @command="handleCommand">
             <span class="el-dropdown__box">
               <el-avatar :src="userStore.user.user_pic || avatar" />
@@ -198,9 +178,8 @@ const onLocaleChange = (l: Locale) => setLocale(l)
         </div>
       </el-header>
       <el-main>
-        <!-- 面包屑导航 -->
         <AppBreadcrumb class="breadcrumb-bar" />
-        <!-- 二级路由出口（keep-alive 缓存列表页，保留分页与搜索状态） -->
+        <!-- keep-alive 缓存列表页，保留分页与搜索状态 -->
         <router-view v-slot="{ Component }">
           <keep-alive :include="['article-manage', 'article-channel']">
             <component :is="Component" />

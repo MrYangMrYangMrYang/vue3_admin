@@ -130,43 +130,35 @@ const EyeBall = defineComponent({
 })
 
 const containerRef = ref(null)
-const mouse = { x: 0, y: 0 } // 实时鼠标坐标
-let rafId = 0 // RequestAnimationFrame ID
+const mouse = { x: 0, y: 0 }
+let rafId = 0
 
-// 角色引用
+// 角色身体/面部 DOM 引用
 const purpleRef = ref(null)
 const blackRef = ref(null)
 const yellowRef = ref(null)
 const orangeRef = ref(null)
 
-// 角色面部引用
 const purpleFaceRef = ref(null)
 const blackFaceRef = ref(null)
 const yellowFaceRef = ref(null)
 const orangeFaceRef = ref(null)
 const yellowMouthRef = ref(null)
 
-// GSAP 高性能优化对象，用于平滑更新样式
+// GSAP quickTo 实例，用于高性能、低延迟的样式平滑更新
 const quickToRefs = ref(null)
-const blinkTimers = { purple: null, black: null } // 眨眼定时器
+const blinkTimers = { purple: null, black: null }
 const isLooking = ref(false) // 是否正在进行“对视”动画
 let lookingTimer = null
 
-/**
- * 鼠标移动监听器
- */
 const onMove = (e) => {
   mouse.x = e.clientX
   mouse.y = e.clientY
 }
 
-/**
- * 判断是否处于“隐藏密码”状态（即进入遮眼保护模式）
- */
+/** 是否处于“隐藏密码”状态（进入遮眼保护模式） */
 const isHidingPassword = () => props.passwordLength > 0 && !props.showPassword
-/**
- * 判断是否处于“显示密码”状态（即取消遮眼保护模式）
- */
+/** 是否处于“显示密码”状态（取消遮眼保护模式） */
 const isShowingPassword = () => props.passwordLength > 0 && props.showPassword
 
 onMounted(() => {
@@ -178,7 +170,6 @@ onMounted(() => {
       duration: 0.3,
       ease: 'power2.out'
     }),
-    // ... 其他 quickTo 配置已略 ...
     blackSkew: gsap.quickTo(blackRef.value, 'skewX', {
       duration: 0.3,
       ease: 'power2.out'
