@@ -136,6 +136,11 @@ watch(isRegister, () => {
 const onPasswordFocus = () => {
   isTyping.value = true
 }
+
+const forgotDialogVisible = ref(false)
+const onForgotPassword = () => {
+  forgotDialogVisible.value = true
+}
 </script>
 
 <template>
@@ -280,9 +285,13 @@ const onPasswordFocus = () => {
               <el-checkbox v-model="rememberMe">{{
                 t('login.rememberMe')
               }}</el-checkbox>
-              <el-link type="primary" :underline="false">{{
-                t('login.forgotPassword')
-              }}</el-link>
+              <el-link
+                type="primary"
+                :underline="false"
+                @click="onForgotPassword"
+              >
+                {{ t('login.forgotPassword') }}
+              </el-link>
             </div>
           </transition>
 
@@ -314,6 +323,26 @@ const onPasswordFocus = () => {
         </div>
       </div>
     </div>
+
+    <el-dialog
+      v-model="forgotDialogVisible"
+      :title="t('login.forgotTitle')"
+      width="420px"
+      :show-close="true"
+      center
+    >
+      <p class="forgotTip">{{ t('login.forgotTip') }}</p>
+      <p class="forgotEmail">
+        <a :href="`mailto:${t('login.forgotAdminEmail')}`">
+          {{ t('login.forgotAdminEmail') }}
+        </a>
+      </p>
+      <template #footer>
+        <el-button type="primary" @click="forgotDialogVisible = false">
+          {{ t('login.forgotOk') }}
+        </el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -670,5 +699,31 @@ const onPasswordFocus = () => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
+}
+
+.forgotTip {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--el-text-color-regular, #475569);
+  margin: 0 0 16px;
+}
+
+.forgotEmail {
+  font-size: 14px;
+  font-weight: 500;
+  color: #2563eb;
+  margin: 0;
+  text-align: center;
+}
+
+.forgotEmail a {
+  color: #2563eb;
+  text-decoration: none;
+  border-bottom: 1px dashed currentColor;
+  padding-bottom: 1px;
+}
+
+.forgotEmail a:hover {
+  color: #1d4ed8;
 }
 </style>

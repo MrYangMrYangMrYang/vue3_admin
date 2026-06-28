@@ -19,6 +19,11 @@ export default {
   'login.register': 'Sign Up',
   'login.rememberMe': 'Remember me',
   'login.forgotPassword': 'Forgot password?',
+  'login.forgotTitle': 'Reset Password',
+  'login.forgotTip':
+    'The demo version has not integrated the password reset API. To reset your password, please contact the system administrator at:',
+  'login.forgotAdminEmail': 'admin@bigevent.com',
+  'login.forgotOk': 'Got it',
   'login.noAccount': "Don't have an account?",
   'login.hasAccount': 'Already have an account?',
   'login.loginNow': 'Sign in now',
