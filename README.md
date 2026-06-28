@@ -96,6 +96,19 @@
 - ✅ **GitHub Actions CI**：push/PR 自动触发 lint + test + build 流水线
 - ✅ **Docker 多阶段构建**：node 构建 + nginx 运行，一键容器化部署
 
+### 📊 Lighthouse 跑分（生产构建 · 桌面端 · 登录页）
+
+| 指标 | 分数 | 评级 |
+|------|------|------|
+| Performance（性能） | **96** | 优秀 |
+| Best Practices（最佳实践） | **100** | 完美 |
+| Accessibility（无障碍） | **88** | 良好 |
+| SEO | **70** | 及格（登录页 SPA 预渲染限制） |
+
+**关键性能指标**：FCP 0.9s · LCP 1.0s · TTI 1.0s · TBT 0ms
+
+> 跑分环境：`pnpm build && pnpm preview` + Edge DevTools Lighthouse，Desktop 模式，4 项全选。
+
 ---
 
 ## 功能特性
