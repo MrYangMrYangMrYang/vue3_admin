@@ -4,18 +4,24 @@ import { Edit, Delete } from '@element-plus/icons-vue'
 import { artGetChannelsService, artDelChannelService } from '@/api/article'
 import ChannelEdit from './components/ChannelEdit.vue'
 import { ArticleChannel as ArticleChannelType } from '@/types'
+import { useI18n } from '@/composables'
+import SkeletonTable from '@/components/SkeletonTable.vue'
+
+const { t } = useI18n()
 
 /** 组件名（供 keep-alive include 匹配，缓存列表页状态） */
 defineOptions({ name: 'article-channel' })
 
 const channelList = ref<ArticleChannelType[]>([])
 const loading = ref(true) // 初始为 true，避免空状态闪烁
+const isFirstLoad = ref(true) // 首次加载使用骨架屏，后续使用 v-loading
 
 const getChannelList = async () => {
   loading.value = true
   const res = await artGetChannelsService()
-  channelList.value = res.data.data
+  channelList.value = res.data
   loading.value = false
+  isFirstLoad.value = false
 }
 getChannelList()
 
@@ -32,16 +38,16 @@ const onAddChannel = () => {
 const onDelChannel = async (row: ArticleChannelType, _index?: number) => {
   try {
     await ElMessageBox.confirm(
-      '确定要删除该分类吗？删除后该分类下的文章将变为"未分类"。',
-      '删除确认',
+      t('channel.deleteConfirm'),
+      t('channel.deleteTitle'),
       {
         type: 'warning',
-        confirmButtonText: '删除',
-        cancelButtonText: '取消'
+        confirmButtonText: t('channel.delete'),
+        cancelButtonText: t('channel.cancel')
       }
     )
     await artDelChannelService(row.id)
-    ElMessage.success({ message: '删除成功', duration: 1500 })
+    ElMessage.success({ message: t('channel.deleteSuccess'), duration: 1500 })
     getChannelList()
   } catch {
     // 用户取消删除
@@ -54,14 +60,18 @@ const onSuccess = () => {
 </script>
 
 <template>
-  <page-container title="文章分类">
+  <page-container :title="t('channel.title')">
     <template #extra>
-      <el-button @click="onAddChannel" type="primary">添加分类</el-button>
+      <el-button @click="onAddChannel" type="primary">
+        {{ t('channel.addChannel') }}
+      </el-button>
     </template>
 
     <ChannelEdit ref="dialog" @success="onSuccess"></ChannelEdit>
 
+    <SkeletonTable v-if="isFirstLoad && loading" :rows="4" :cols="3" />
     <el-table
+      v-else
       v-loading="loading"
       :data="channelList"
       border
@@ -70,37 +80,44 @@ const onSuccess = () => {
     >
       <el-table-column
         type="index"
-        label="序号"
+        :label="t('channel.indexColumn')"
         width="100"
         align="center"
       ></el-table-column>
       <el-table-column
         prop="cate_name"
-        label="分类名称"
+        :label="t('channel.nameColumn')"
         min-width="150"
       ></el-table-column>
       <el-table-column
         prop="cate_alias"
-        label="分类别名"
+        :label="t('channel.aliasColumn')"
         min-width="150"
       ></el-table-column>
-      <el-table-column label="操作" width="150" align="center" fixed="right">
+      <el-table-column
+        :label="t('channel.actionsColumn')"
+        width="150"
+        align="center"
+        fixed="right"
+      >
         <template #default="{ row, $index }">
-          <el-tooltip content="编辑分类" placement="top">
+          <el-tooltip :content="t('channel.editChannel')" placement="top">
             <el-button
               :icon="Edit"
               circle
               plain
               type="primary"
+              :aria-label="t('channel.editChannel')"
               @click="onEditChannel(row, $index)"
             ></el-button>
           </el-tooltip>
-          <el-tooltip content="删除分类" placement="top">
+          <el-tooltip :content="t('channel.deleteChannel')" placement="top">
             <el-button
               :icon="Delete"
               circle
               plain
               type="danger"
+              :aria-label="t('channel.deleteChannel')"
               @click="onDelChannel(row, $index)"
             ></el-button>
           </el-tooltip>
@@ -108,7 +125,7 @@ const onSuccess = () => {
       </el-table-column>
 
       <template #empty>
-        <el-empty description="没有数据"></el-empty>
+        <el-empty :description="t('channel.noData')"></el-empty>
       </template>
     </el-table>
   </page-container>

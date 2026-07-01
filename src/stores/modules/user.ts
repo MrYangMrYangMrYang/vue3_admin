@@ -33,7 +33,7 @@ export const useUserStore = defineStore(
      */
     const getUser = async (): Promise<void> => {
       const res = await userGetInfoService()
-      user.value = res.data.data
+      user.value = res.data
     }
 
     /** 直接更新用户状态（通常用于编辑个人信息后的本地同步） */

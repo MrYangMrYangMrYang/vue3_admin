@@ -6,16 +6,14 @@
 import { describe, it, expect, vi } from 'vitest'
 import { useTable } from '../useTable'
 
-/** 模拟后端 API 标准响应结构 { data: { data: { data: [], total: N } } } */
+/** 模拟后端 API 标准响应结构（已解包 AxiosResponse）：{ data: { data: [], total: N } } */
 const mockResponse = {
   data: {
-    data: {
-      data: [
-        { id: 1, name: 'item1' },
-        { id: 2, name: 'item2' }
-      ],
-      total: 100
-    }
+    data: [
+      { id: 1, name: 'item1' },
+      { id: 2, name: 'item2' }
+    ],
+    total: 100
   }
 }
 

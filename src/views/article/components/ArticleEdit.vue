@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, nextTick } from 'vue'
+import { ref, nextTick, computed } from 'vue'
 import ChannelSelect from './ChannelSelect.vue'
 import { Plus } from '@element-plus/icons-vue'
 import type { UploadFile } from 'element-plus'
@@ -12,6 +12,9 @@ import {
 } from '@/api/article'
 import { baseURL } from '@/utils/request'
 import axios from 'axios'
+import { useI18n } from '@/composables'
+
+const { t } = useI18n()
 
 const visibleDrawer = ref(false)
 const form = ref()
@@ -33,21 +36,27 @@ const formModel = ref<ArticleFormModel>({
   state: ''
 })
 
-const rules = {
+const rules = computed(() => ({
   title: [
-    { required: true, message: '请输入文章标题', trigger: 'blur' },
+    { required: true, message: t('article.titleRequired'), trigger: 'blur' },
     {
       min: 2,
       max: 15,
       pattern: /^\S{2,15}$/,
-      message: '标题必须是2到15位的非空字符',
+      message: t('article.titlePattern'),
       trigger: 'blur'
     }
   ],
   cate_id: [
-    { required: true, message: '请选择文章分类', trigger: ['blur', 'change'] }
+    {
+      required: true,
+      message: t('article.categoryRequired'),
+      trigger: ['blur', 'change']
+    }
   ],
-  cover_img: [{ required: true, message: '请上传文章封面', trigger: 'change' }],
+  cover_img: [
+    { required: true, message: t('article.coverRequired'), trigger: 'change' }
+  ],
   content: [
     {
       required: true,
@@ -59,9 +68,9 @@ const rules = {
         // 去除 HTML 标签后验证纯文本内容
         const textContent = value ? value.replace(/<[^>]*>/g, '').trim() : ''
         if (!textContent) {
-          callback(new Error('请输入文章内容'))
+          callback(new Error(t('article.contentRequired')))
         } else if (textContent.length < 2) {
-          callback(new Error('文章内容至少需要2个字符'))
+          callback(new Error(t('article.contentMin')))
         } else {
           callback()
         }
@@ -69,7 +78,7 @@ const rules = {
       trigger: 'change'
     }
   ]
-}
+}))
 
 const imgUrl = ref('')
 
@@ -101,7 +110,7 @@ async function imageUrlToFileObject(
     })
     return file
   } catch {
-    ElMessage.error('图片转换失败')
+    ElMessage.error(t('article.imageConvertFailed'))
     return null
   }
 }
@@ -127,12 +136,12 @@ const onPublish = async (state: string) => {
   if (formModel.value.id) {
     fd.append('id', String(formModel.value.id))
     await artEditService(fd)
-    ElMessage.success('修改成功')
+    ElMessage.success(t('article.editSuccess'))
     visibleDrawer.value = false
     emit('success', 'edit')
   } else {
     await artPublishService(fd)
-    ElMessage.success('添加成功')
+    ElMessage.success(t('article.addSuccess'))
     visibleDrawer.value = false
     emit('success', 'add')
   }
@@ -151,7 +160,7 @@ const open = async (obj: Partial<ArticleFormModel>) => {
   if (obj.id) {
     // 编辑模式：拉取详情并回显，将封面 URL 转换为 File 对象
     const res = await artGetDetailService(obj.id!)
-    const data = res.data.data
+    const data = res.data
     formModel.value = {
       id: data.id,
       title: data.title,
@@ -192,19 +201,22 @@ defineExpose({
 <template>
   <el-drawer
     v-model="visibleDrawer"
-    :title="formModel.id ? '编辑文章' : '添加文章'"
+    :title="formModel.id ? t('article.editTitle') : t('article.addTitle')"
     direction="rtl"
     size="50%"
     class="article-drawer"
   >
     <el-form :model="formModel" :rules="rules" ref="form" label-width="100px">
-      <el-form-item label="文章标题" prop="title">
-        <el-input v-model="formModel.title" placeholder="请输入标题"></el-input>
+      <el-form-item :label="t('article.titleColumn')" prop="title">
+        <el-input
+          v-model="formModel.title"
+          :placeholder="t('article.titlePlaceholder')"
+        ></el-input>
       </el-form-item>
-      <el-form-item label="文章分类" prop="cate_id">
+      <el-form-item :label="t('article.category')" prop="cate_id">
         <ChannelSelect v-model="formModel.cate_id" width="100%"></ChannelSelect>
       </el-form-item>
-      <el-form-item label="文章封面" prop="cover_img">
+      <el-form-item :label="t('article.coverLabel')" prop="cover_img">
         <!-- 关闭自动上传，仅做前端本地预览；提交时再随 FormData 上传 -->
         <el-upload
           class="avatar-uploader"
@@ -216,7 +228,7 @@ defineExpose({
           <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
         </el-upload>
       </el-form-item>
-      <el-form-item label="文章内容" prop="content">
+      <el-form-item :label="t('article.contentLabel')" prop="content">
         <div class="editor">
           <quill-editor
             ref="editor"
@@ -224,13 +236,17 @@ defineExpose({
             content-type="html"
             theme="snow"
             @update:content="onEditorChange"
-            placeholder="请输入文章内容..."
+            :placeholder="t('article.contentPlaceholder')"
           ></quill-editor>
         </div>
       </el-form-item>
       <el-form-item>
-        <el-button @click="onPublish('已发布')" type="primary">发布</el-button>
-        <el-button @click="onPublish('草稿')" type="info">草稿</el-button>
+        <el-button @click="onPublish('已发布')" type="primary">{{
+          t('article.publish')
+        }}</el-button>
+        <el-button @click="onPublish('草稿')" type="info">{{
+          t('article.saveDraft')
+        }}</el-button>
       </el-form-item>
     </el-form>
   </el-drawer>

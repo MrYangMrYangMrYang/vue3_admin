@@ -18,7 +18,7 @@ const channelList = ref<ArticleChannel[]>([])
 
 const getChannelList = async () => {
   const res = await artGetChannelsService()
-  channelList.value = res.data.data
+  channelList.value = res.data
 }
 getChannelList()
 </script>

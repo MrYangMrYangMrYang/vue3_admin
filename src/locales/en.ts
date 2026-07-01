@@ -1,6 +1,6 @@
 /**
  * @fileoverview 英文语言包
- * @description 与 zh.ts 一一对应的英文翻译
+ * @description 与 zh.ts 一一对应的完整英文翻译
  */
 export default {
   // ─── Login ────────────────────────────────────────
@@ -31,6 +31,15 @@ export default {
   'login.success': 'Login successful',
   'login.registerSuccess': 'Registration successful',
   'login.failed': 'Login failed, please retry',
+  'login.tokenMissing': 'No token received in login response',
+  'login.usernameRequired': 'Please enter your username',
+  'login.usernamePattern': 'Username must be 2–7 non-whitespace characters',
+  'login.passwordRequired': 'Please enter your password',
+  'login.passwordPattern': 'Password must be 6–15 non-whitespace characters',
+  'login.confirmRequired': 'Please confirm your password',
+  'login.confirmMismatch': 'Passwords do not match',
+  'login.helpCenter': 'Help Center',
+  'login.privacyPolicy': 'Privacy Policy',
 
   // ─── Menu ─────────────────────────────────────────
   'menu.articleChannel': 'Categories',
@@ -41,6 +50,124 @@ export default {
   'menu.password': 'Password',
   'menu.logout': 'Logout',
   'menu.manager': 'Manager',
+
+  // ─── Article Management ──────────────────────────
+  'article.title': 'Article Management',
+  'article.addArticle': 'Add Article',
+  'article.category': 'Category',
+  'article.categoryLabel': 'Category:',
+  'article.statusLabel': 'Status:',
+  'article.published': 'Published',
+  'article.draft': 'Draft',
+  'article.search': 'Search',
+  'article.reset': 'Reset',
+  'article.batchSelected': '{count} selected',
+  'article.batchDelete': 'Batch Delete',
+  'article.titleColumn': 'Title',
+  'article.categoryColumn': 'Category',
+  'article.pubDateColumn': 'Published',
+  'article.statusColumn': 'Status',
+  'article.actionsColumn': 'Actions',
+  'article.editArticle': 'Edit Article',
+  'article.deleteArticle': 'Delete Article',
+  'article.deleteConfirm':
+    'Are you sure to delete this article? This action cannot be undone.',
+  'article.deleteTitle': 'Delete Confirmation',
+  'article.delete': 'Delete',
+  'article.cancel': 'Cancel',
+  'article.deleteSuccess': 'Deleted successfully',
+  'article.batchDeleteConfirm':
+    'Are you sure to delete {count} articles? This action cannot be undone.',
+  'article.batchDeleteTitle': 'Batch Delete Confirmation',
+  'article.batchDeleteSuccess': '{count} articles deleted',
+  'article.batchDeletePartial': '{success} succeeded, {fail} failed',
+  'article.editTitle': 'Edit Article',
+  'article.addTitle': 'Add Article',
+  'article.titlePlaceholder': 'Enter title',
+  'article.titleRequired': 'Please enter article title',
+  'article.titlePattern': 'Title must be 2–15 non-whitespace characters',
+  'article.categoryRequired': 'Please select a category',
+  'article.coverRequired': 'Please upload a cover image',
+  'article.coverLabel': 'Cover Image',
+  'article.contentLabel': 'Content',
+  'article.contentRequired': 'Please enter article content',
+  'article.contentMin': 'Content must have at least 2 characters',
+  'article.contentPlaceholder': 'Enter article content...',
+  'article.publish': 'Publish',
+  'article.saveDraft': 'Save Draft',
+  'article.editSuccess': 'Updated successfully',
+  'article.addSuccess': 'Added successfully',
+  'article.imageConvertFailed': 'Image conversion failed',
+
+  // ─── Category Management ─────────────────────────
+  'channel.title': 'Categories',
+  'channel.addChannel': 'Add Category',
+  'channel.indexColumn': '#',
+  'channel.nameColumn': 'Name',
+  'channel.aliasColumn': 'Alias',
+  'channel.actionsColumn': 'Actions',
+  'channel.editChannel': 'Edit Category',
+  'channel.deleteChannel': 'Delete Category',
+  'channel.deleteConfirm':
+    'Are you sure to delete this category? Articles in it will become "Uncategorized".',
+  'channel.deleteTitle': 'Delete Confirmation',
+  'channel.delete': 'Delete',
+  'channel.cancel': 'Cancel',
+  'channel.deleteSuccess': 'Deleted successfully',
+  'channel.noData': 'No Data',
+  'channel.editTitle': 'Edit Category',
+  'channel.addTitle': 'Add Category',
+  'channel.nameLabel': 'Category Name',
+  'channel.aliasLabel': 'Category Alias',
+  'channel.namePlaceholder': 'Enter category name',
+  'channel.aliasPlaceholder': 'Enter category alias',
+  'channel.nameRequired': 'Please enter category name',
+  'channel.namePattern': 'Must be 2–7 non-whitespace characters',
+  'channel.aliasRequired': 'Please enter category alias',
+  'channel.aliasPattern': 'Must be 2–15 alphanumeric characters',
+  'channel.editSuccess': 'Updated successfully',
+  'channel.addSuccess': 'Added successfully',
+  'channel.confirm': 'Confirm',
+
+  // ─── Profile ──────────────────────────────────────
+  'profile.title': 'Profile',
+  'profile.account': 'Username',
+  'profile.nickname': 'Nickname',
+  'profile.email': 'Email',
+  'profile.nicknamePlaceholder': 'Enter your nickname',
+  'profile.emailPlaceholder': 'Enter your email',
+  'profile.submit': 'Save Changes',
+  'profile.nicknameRequired': 'Please enter your nickname',
+  'profile.nicknamePattern': 'Nickname must be 2–7 non-whitespace characters',
+  'profile.emailRequired': 'Please enter your email',
+  'profile.emailInvalid': 'Please enter a valid email address',
+  'profile.updateSuccess': 'Updated successfully',
+
+  // ─── Avatar ───────────────────────────────────────
+  'avatar.title': 'Change Avatar',
+  'avatar.selectImage': 'Select Image',
+  'avatar.upload': 'Upload Avatar',
+  'avatar.success': 'Avatar updated successfully',
+
+  // ─── Password ─────────────────────────────────────
+  'password.title': 'Change Password',
+  'password.oldPassword': 'Current Password',
+  'password.newPassword': 'New Password',
+  'password.confirmPassword': 'Confirm Password',
+  'password.oldPlaceholder': 'Enter current password',
+  'password.newPlaceholder': 'Enter new password',
+  'password.confirmPlaceholder': 'Re-enter new password',
+  'password.submit': 'Change Password',
+  'password.reset': 'Reset',
+  'password.oldRequired': 'Please enter current password',
+  'password.oldLength': 'Password must be 6–15 characters',
+  'password.newRequired': 'Please enter new password',
+  'password.newPattern': 'Password must be 6–15 non-whitespace characters',
+  'password.confirmRequired': 'Please re-enter new password',
+  'password.confirmLength': 'Confirmation must be 6–15 characters',
+  'password.notSame': 'New password must differ from current password',
+  'password.mustMatch': 'Confirmation must match new password',
+  'password.success': 'Password changed successfully',
 
   // ─── Theme & Locale ───────────────────────────────
   'theme.dark': 'Dark Mode',
@@ -61,5 +188,6 @@ export default {
   'common.notFound': 'Page Lost',
   'common.notFoundDesc':
     'The page you visited does not exist or has been removed',
-  'common.backHome': 'Back to Home'
+  'common.backHome': 'Back to Home',
+  'common.footer': 'Big Event ©2025 Created by MrYang'
 }

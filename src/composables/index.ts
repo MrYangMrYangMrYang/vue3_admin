@@ -14,3 +14,6 @@ export type { UseRequestOptions, UseRequestReturn } from './useRequest'
 
 export { useTable } from './useTable'
 export type { UseTableOptions, UseTableReturn, PageParams } from './useTable'
+
+export { useI18n } from './useI18n'
+export type { Locale } from './useI18n'

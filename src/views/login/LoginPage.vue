@@ -30,30 +30,30 @@ onMounted(() => {
   }
 })
 
-const rules = {
+const rules = computed(() => ({
   username: [
-    { required: true, message: '请输入用户名', trigger: 'blur' },
+    { required: true, message: t('login.usernameRequired'), trigger: 'blur' },
     {
       min: 2,
       max: 7,
       pattern: /^\S{2,7}$/,
-      message: '用户名必须是2-7位的非空字符',
+      message: t('login.usernamePattern'),
       trigger: 'blur'
     }
   ],
   password: [
-    { required: true, message: '请输入密码', trigger: 'blur' },
+    { required: true, message: t('login.passwordRequired'), trigger: 'blur' },
     {
       pattern: /^\S{6,15}$/,
-      message: '密码必须是6-15位的非空字符',
+      message: t('login.passwordPattern'),
       trigger: 'blur'
     }
   ],
   repassword: [
-    { required: true, message: '请确认密码', trigger: 'blur' },
+    { required: true, message: t('login.confirmRequired'), trigger: 'blur' },
     {
       pattern: /^\S{6,15}$/,
-      message: '密码必须是6-15位的非空字符',
+      message: t('login.passwordPattern'),
       trigger: 'blur'
     },
     {
@@ -63,7 +63,7 @@ const rules = {
         callback: (error?: Error) => void
       ) => {
         if (value !== formModel.value.password) {
-          callback(new Error('两次输入密码不一致'))
+          callback(new Error(t('login.confirmMismatch')))
         } else {
           callback()
         }
@@ -71,7 +71,7 @@ const rules = {
       trigger: 'blur'
     }
   ]
-}
+}))
 
 const form = ref()
 const isRegister = ref(false)
@@ -101,10 +101,9 @@ const login = async () => {
     const res = await userLoginService(formModel.value)
 
     // 响应兼容：token 可能位于 data 包裹层或顶层，用可选链安全提取
-    const resData = res.data as { data?: { token?: string }; token?: string }
-    const token = resData.data?.token ?? resData.token
+    const token = res.data?.token ?? (res as { token?: string }).token
     if (!token) {
-      throw new Error('登录响应中未获取到 Token')
+      throw new Error(t('login.tokenMissing'))
     }
 
     userStore.setToken(token)
@@ -181,8 +180,8 @@ const onForgotPassword = () => {
       </div>
 
       <div class="leftFooter">
-        <a href="#">帮助中心</a>
-        <a href="#">隐私政策</a>
+        <a href="#">{{ t('login.helpCenter') }}</a>
+        <a href="#">{{ t('login.privacyPolicy') }}</a>
       </div>
 
       <div class="decorBlur1"></div>

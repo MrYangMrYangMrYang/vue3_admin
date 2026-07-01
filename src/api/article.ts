@@ -3,7 +3,6 @@
  */
 
 import request from '@/utils/request'
-import type { AxiosResponse } from 'axios'
 import type {
   ChannelFormData,
   ArticleListParams,
@@ -19,7 +18,7 @@ import type {
  * @returns 分类数组，每项包含 id, cate_name, cate_alias
  */
 export const artGetChannelsService = (): Promise<
-  AxiosResponse<ApiResponse<ArticleChannel[]>>
+  ApiResponse<ArticleChannel[]>
 > => request.get('/my/cate/list')
 
 /**
@@ -28,8 +27,7 @@ export const artGetChannelsService = (): Promise<
  */
 export const artAddChannelService = (
   data: ChannelFormData
-): Promise<AxiosResponse<ApiResponse<null>>> =>
-  request.post('/my/cate/add', data)
+): Promise<ApiResponse<null>> => request.post('/my/cate/add', data)
 
 /**
  * 编辑文章分类
@@ -37,17 +35,14 @@ export const artAddChannelService = (
  */
 export const artEditChannelService = (
   data: ChannelFormData
-): Promise<AxiosResponse<ApiResponse<null>>> =>
-  request.put('/my/cate/info', data)
+): Promise<ApiResponse<null>> => request.put('/my/cate/info', data)
 
 /**
  * 删除文章分类
  * @warning 删除分类可能会影响该分类下的所有文章！建议先确认。
  * @param id 要删除的分类 ID
  */
-export const artDelChannelService = (
-  id: number
-): Promise<AxiosResponse<ApiResponse<null>>> =>
+export const artDelChannelService = (id: number): Promise<ApiResponse<null>> =>
   request.delete('/my/cate/del', { params: { id } })
 
 /**
@@ -57,7 +52,7 @@ export const artDelChannelService = (
  */
 export const artGetListService = (
   params: ArticleListParams
-): Promise<AxiosResponse<ApiResponse<PaginatedData<ArticleDetail>>>> =>
+): Promise<ApiResponse<PaginatedData<ArticleDetail>>> =>
   request.get('/my/article/list', { params })
 
 /**
@@ -67,8 +62,7 @@ export const artGetListService = (
  */
 export const artPublishService = (
   data: PublishArticleFormData
-): Promise<AxiosResponse<ApiResponse<null>>> =>
-  request.post('/my/article/add', data)
+): Promise<ApiResponse<null>> => request.post('/my/article/add', data)
 
 /**
  * 获取文章详情
@@ -76,16 +70,14 @@ export const artPublishService = (
  */
 export const artGetDetailService = (
   id: number
-): Promise<AxiosResponse<ApiResponse<ArticleDetail>>> =>
+): Promise<ApiResponse<ArticleDetail>> =>
   request.get('/my/article/info', { params: { id } })
 
 /**
  * 编辑已有文章
  * @param data 表单数据 + 文章 ID
  */
-export const artEditService = (
-  data: FormData
-): Promise<AxiosResponse<ApiResponse<null>>> =>
+export const artEditService = (data: FormData): Promise<ApiResponse<null>> =>
   request.put('/my/article/info', data)
 
 /**
@@ -93,7 +85,5 @@ export const artEditService = (
  * @warning 此操作不可逆！删除前应提示用户确认。
  * @param id 要删除的文章 ID
  */
-export const artDelService = (
-  id: number
-): Promise<AxiosResponse<ApiResponse<null>>> =>
+export const artDelService = (id: number): Promise<ApiResponse<null>> =>
   request.delete('/my/article/info', { params: { id } })

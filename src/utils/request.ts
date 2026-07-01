@@ -54,9 +54,9 @@ instance.interceptors.response.use(
     // 请求完成，从 pending 池移除
     removePending(res.config)
 
-    // 后端约定 code === 0 表示操作成功
+    // 后端约定 code === 0 表示操作成功，解包 axios response 直接返回响应体
     if (res.data.code === 0) {
-      return res
+      return res.data
     }
 
     ElMessage.error(res.data.message || '服务异常')

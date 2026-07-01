@@ -3,7 +3,6 @@
  */
 
 import request from '@/utils/request'
-import type { AxiosResponse } from 'axios'
 import type {
   RegisterData,
   LoginData,
@@ -21,7 +20,7 @@ import type {
  */
 export const userRegisterService = (
   data: RegisterData
-): Promise<AxiosResponse<ApiResponse<null>>> => request.post('/api/reg', data)
+): Promise<ApiResponse<null>> => request.post('/api/reg', data)
 
 /**
  * 用户登录服务
@@ -30,16 +29,14 @@ export const userRegisterService = (
  */
 export const userLoginService = (
   data: LoginData
-): Promise<AxiosResponse<ApiResponse<LoginResponseData>>> =>
-  request.post('/api/login', data)
+): Promise<ApiResponse<LoginResponseData>> => request.post('/api/login', data)
 
 /**
  * 获取当前登录用户信息
  * @returns 包含用户详细信息（id, username, nickname, email, user_pic）
  */
-export const userGetInfoService = (): Promise<
-  AxiosResponse<ApiResponse<UserInfo>>
-> => request.get('/my/userinfo')
+export const userGetInfoService = (): Promise<ApiResponse<UserInfo>> =>
+  request.get('/my/userinfo')
 
 /**
  * 更新用户基本信息（昵称、邮箱，不可修改用户名）
@@ -47,8 +44,7 @@ export const userGetInfoService = (): Promise<
  */
 export const userUpdateInfoService = (
   data: UpdateUserInfoData
-): Promise<AxiosResponse<ApiResponse<null>>> =>
-  request.put('/my/userinfo', data)
+): Promise<ApiResponse<null>> => request.put('/my/userinfo', data)
 
 /**
  * 更新用户头像
@@ -57,8 +53,7 @@ export const userUpdateInfoService = (
  */
 export const userUpdateAvatarService = (
   avatar: string
-): Promise<AxiosResponse<ApiResponse<null>>> =>
-  request.patch('/my/update/avatar', { avatar })
+): Promise<ApiResponse<null>> => request.patch('/my/update/avatar', { avatar })
 
 /**
  * 修改用户密码
@@ -66,5 +61,4 @@ export const userUpdateAvatarService = (
  */
 export const userUpdatePasswordService = (
   data: UpdatePasswordData
-): Promise<AxiosResponse<ApiResponse<null>>> =>
-  request.patch('/my/updatepwd', data)
+): Promise<ApiResponse<null>> => request.patch('/my/updatepwd', data)

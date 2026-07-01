@@ -33,12 +33,27 @@ const locale = ref<Locale>(
 )
 
 /**
- * 翻译函数
+ * 翻译函数（支持参数插值）
  * @param key - 语言包 key（如 'login.title'）
+ * @param params - 可选插值参数，替换模板中的 {paramName}
  * @returns 翻译后的文本，未命中时返回 key 本身
+ *
+ * @example
+ * ```typescript
+ * t('article.batchSelected', { count: 5 }) // → '已选择 5 项'
+ * ```
  */
-export const t = (key: string): string => {
-  return messages[locale.value][key] ?? key
+export const t = (
+  key: string,
+  params?: Record<string, string | number>
+): string => {
+  let text = messages[locale.value][key] ?? key
+  if (params) {
+    Object.entries(params).forEach(([k, v]) => {
+      text = text.replaceAll(`{${k}}`, String(v))
+    })
+  }
+  return text
 }
 
 /**

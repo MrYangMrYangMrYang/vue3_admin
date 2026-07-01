@@ -1,10 +1,13 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { userUpdatePasswordService } from '@/api/user'
 import { UpdatePasswordData } from '@/types'
 import { useUserStore } from '@/stores'
 import type { UserInfo } from '@/types'
 import { useRouter } from 'vue-router'
+import { useI18n } from '@/composables'
+
+const { t } = useI18n()
 
 const form = ref()
 const pwdForm = ref<UpdatePasswordData>({
@@ -19,7 +22,7 @@ const checkDifferent = (
   callback: (error?: Error) => void
 ) => {
   if (value === pwdForm.value.old_pwd) {
-    callback(new Error('新密码不能与原密码一样'))
+    callback(new Error(t('password.notSame')))
   } else {
     callback()
   }
@@ -31,34 +34,34 @@ const checkSameAsNewPwd = (
   callback: (error?: Error) => void
 ) => {
   if (value !== pwdForm.value.new_pwd) {
-    callback(new Error('确认密码必须和新密码一样'))
+    callback(new Error(t('password.mustMatch')))
   } else {
     callback()
   }
 }
 
-const rules = ref({
+const rules = computed(() => ({
   old_pwd: [
-    { required: true, message: '请输入原密码', trigger: 'blur' },
-    { min: 6, max: 15, message: '原密码长度在6-15位之间', trigger: 'blur' }
+    { required: true, message: t('password.oldRequired'), trigger: 'blur' },
+    { min: 6, max: 15, message: t('password.oldLength'), trigger: 'blur' }
   ],
   new_pwd: [
-    { required: true, message: '请输入新密码', trigger: 'blur' },
+    { required: true, message: t('password.newRequired'), trigger: 'blur' },
     {
       min: 6,
       max: 15,
       pattern: /^\S{6,15}$/,
-      message: '密码必须是6-15位的非空字符',
+      message: t('password.newPattern'),
       trigger: 'blur'
     },
     { validator: checkDifferent, trigger: 'blur' }
   ],
   re_pwd: [
-    { required: true, message: '请再次输入新密码', trigger: 'blur' },
-    { min: 6, max: 15, message: '确认密码长度在6-15位之间', trigger: 'blur' },
+    { required: true, message: t('password.confirmRequired'), trigger: 'blur' },
+    { min: 6, max: 15, message: t('password.confirmLength'), trigger: 'blur' },
     { validator: checkSameAsNewPwd, trigger: 'blur' }
   ]
-})
+}))
 
 const userStore = useUserStore()
 const router = useRouter()
@@ -69,7 +72,7 @@ const submitForm = async () => {
     await form.value.validate()
     loading.value = true
     await userUpdatePasswordService(pwdForm.value)
-    ElMessage.success({ message: '密码修改成功', duration: 1500 })
+    ElMessage.success({ message: t('password.success'), duration: 1500 })
     // 修改成功后清除 token 和用户信息，跳转至登录页重新登录
     userStore.setToken('')
     userStore.setUser({} as UserInfo)
@@ -87,35 +90,37 @@ const resetForm = () => {
 </script>
 
 <template>
-  <page-container title="修改密码">
+  <page-container :title="t('password.title')">
     <div class="form-wrapper">
       <el-form ref="form" :model="pwdForm" :rules="rules" label-width="100px">
-        <el-form-item label="原密码" prop="old_pwd">
+        <el-form-item :label="t('password.oldPassword')" prop="old_pwd">
           <el-input
             v-model="pwdForm.old_pwd"
             show-password
-            placeholder="请输入原密码"
+            :placeholder="t('password.oldPlaceholder')"
           ></el-input>
         </el-form-item>
-        <el-form-item label="新密码" prop="new_pwd">
+        <el-form-item :label="t('password.newPassword')" prop="new_pwd">
           <el-input
             v-model="pwdForm.new_pwd"
             show-password
-            placeholder="请输入新密码"
+            :placeholder="t('password.newPlaceholder')"
           ></el-input>
         </el-form-item>
-        <el-form-item label="确认密码" prop="re_pwd">
+        <el-form-item :label="t('password.confirmPassword')" prop="re_pwd">
           <el-input
             v-model="pwdForm.re_pwd"
             show-password
-            placeholder="请再次输入新密码"
+            :placeholder="t('password.confirmPlaceholder')"
           ></el-input>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="submitForm" :loading="loading"
-            >修改密码</el-button
-          >
-          <el-button type="info" @click="resetForm" plain>重置</el-button>
+          <el-button type="primary" @click="submitForm" :loading="loading">
+            {{ t('password.submit') }}
+          </el-button>
+          <el-button type="info" @click="resetForm" plain>
+            {{ t('password.reset') }}
+          </el-button>
         </el-form-item>
       </el-form>
     </div>

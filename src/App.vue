@@ -1,13 +1,19 @@
 <!--
-  @fileoverview Vue 应用根组件：Element Plus 中文配置 + 路由加载条 + <router-view>
+  @fileoverview Vue 应用根组件：响应式 Element Plus 国际化 + 路由加载条 + <router-view>
 -->
 
 <script setup lang="ts">
 import zhCn from 'element-plus/es/locale/lang/zh-cn'
-
-import { ref } from 'vue'
+import en from 'element-plus/es/locale/lang/en'
+import { computed, ref } from 'vue'
 import router from '@/router'
 import ErrorBoundary from '@/components/ErrorBoundary.vue'
+import { useI18n } from '@/composables/useI18n'
+
+const { locale } = useI18n()
+
+/** Element Plus 组件库 locale 跟随应用语言响应式切换 */
+const elLocale = computed(() => (locale.value === 'zh' ? zhCn : en))
 
 /** 控制顶部进度条的显示/隐藏：true 加载中，false 渲染完成 */
 const isLoading = ref(false)
@@ -29,7 +35,7 @@ router.afterEach(() => {
     <!-- 路由加载进度条：v-show 保留 DOM 仅切换 display，固定顶部、z-index 最高 -->
     <div v-show="isLoading" class="router-loading-bar"></div>
 
-    <el-config-provider :locale="zhCn">
+    <el-config-provider :locale="elLocale">
       <!-- 错误边界：捕获路由组件渲染/生命周期错误，提供降级 UI 与重试入口 -->
       <ErrorBoundary>
         <router-view></router-view>

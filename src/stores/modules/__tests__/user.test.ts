@@ -77,10 +77,12 @@ describe('useUserStore 用户状态管理', () => {
     })
 
     it('getUser 应调用 API 并更新 user 状态', async () => {
-      // 配置 mock 返回值
+      // 配置 mock 返回值（已解包 AxiosResponse，直接返回 ApiResponse）
       vi.mocked(userGetInfoService).mockResolvedValue({
-        data: { data: mockUserInfo }
-      } as unknown as Awaited<ReturnType<typeof userGetInfoService>>)
+        code: 0,
+        message: 'success',
+        data: mockUserInfo
+      } as Awaited<ReturnType<typeof userGetInfoService>>)
 
       const store = useUserStore()
       await store.getUser()

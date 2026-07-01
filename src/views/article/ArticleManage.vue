@@ -1,15 +1,21 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { Delete, Edit } from '@element-plus/icons-vue'
 import ChannelSelect from './components/ChannelSelect.vue'
 import ArticleEdit from './components/ArticleEdit.vue'
 import { artGetListService, artDelService } from '@/api/article'
 import { formatTime } from '@/utils/format'
-import { useTable } from '@/composables'
+import { useTable, useI18n } from '@/composables'
 import type { ArticleDetail } from '@/types'
+import SkeletonTable from '@/components/SkeletonTable.vue'
+
+const { t } = useI18n()
 
 /** 组件名（供 keep-alive include 匹配，缓存列表页状态） */
 defineOptions({ name: 'article-manage' })
+
+/** 首次加载使用骨架屏，后续刷新用 v-loading */
+const isFirstLoad = ref(true)
 
 // useTable 自动管理 list/total/loading/params 与分页/搜索/重置逻辑
 const {
@@ -30,6 +36,11 @@ const {
   initialPageSize: 5
 })
 
+// 首次加载完成 → 关闭骨架屏，后续切换回 v-loading
+watch(loading, (val) => {
+  if (!val) isFirstLoad.value = false
+})
+
 const articleEdit = ref()
 
 const onAddArticle = () => {
@@ -43,16 +54,16 @@ const onEditArticle = (row: ArticleDetail) => {
 const onDeleteArticle = async (row: ArticleDetail) => {
   try {
     await ElMessageBox.confirm(
-      '确定要删除这篇文章吗？删除后无法恢复。',
-      '删除确认',
+      t('article.deleteConfirm'),
+      t('article.deleteTitle'),
       {
-        confirmButtonText: '删除',
-        cancelButtonText: '取消',
+        confirmButtonText: t('article.delete'),
+        cancelButtonText: t('article.cancel'),
         type: 'warning'
       }
     )
     await artDelService(row.id)
-    ElMessage.success('删除成功')
+    ElMessage.success(t('article.deleteSuccess'))
     getArticleList()
   } catch {
     // 取消删除或请求失败
@@ -66,11 +77,11 @@ const onBatchDelete = async () => {
   if (selectedRows.value.length === 0) return
   try {
     await ElMessageBox.confirm(
-      `确定要删除选中的 ${selectedRows.value.length} 篇文章吗？删除后无法恢复。`,
-      '批量删除确认',
+      t('article.batchDeleteConfirm', { count: selectedRows.value.length }),
+      t('article.batchDeleteTitle'),
       {
-        confirmButtonText: '删除',
-        cancelButtonText: '取消',
+        confirmButtonText: t('article.delete'),
+        cancelButtonText: t('article.cancel'),
         type: 'warning'
       }
     )
@@ -80,9 +91,16 @@ const onBatchDelete = async () => {
     const successCount = results.filter((r) => r.status === 'fulfilled').length
     const failCount = results.length - successCount
     if (failCount === 0) {
-      ElMessage.success(`成功删除 ${successCount} 篇文章`)
+      ElMessage.success(
+        t('article.batchDeleteSuccess', { count: successCount })
+      )
     } else {
-      ElMessage.warning(`成功 ${successCount} 篇，失败 ${failCount} 篇`)
+      ElMessage.warning(
+        t('article.batchDeletePartial', {
+          success: successCount,
+          fail: failCount
+        })
+      )
     }
     selectedRows.value = []
     getArticleList()
@@ -102,92 +120,113 @@ const onSuccess = (type: string) => {
 </script>
 
 <template>
-  <page-container title="文章管理">
+  <page-container :title="t('article.title')">
     <template #extra>
-      <el-button type="primary" @click="onAddArticle">添加文章</el-button>
+      <el-button type="primary" @click="onAddArticle">
+        {{ t('article.addArticle') }}
+      </el-button>
     </template>
     <ArticleEdit ref="articleEdit" @success="onSuccess"></ArticleEdit>
 
     <el-form inline class="search-form">
-      <el-form-item label="文章分类:">
+      <el-form-item :label="t('article.categoryLabel')">
         <ChannelSelect v-model="params.cate_id" width="200px"></ChannelSelect>
       </el-form-item>
-      <el-form-item label="发布状态:">
+      <el-form-item :label="t('article.statusLabel')">
         <el-select
           v-model="params.state"
-          placeholder="请选择状态"
+          :placeholder="t('article.statusLabel')"
           style="width: 200px"
         >
-          <el-option label="已发布" value="已发布"></el-option>
-          <el-option label="草稿" value="草稿"></el-option>
+          <el-option :label="t('article.published')" value="已发布"></el-option>
+          <el-option :label="t('article.draft')" value="草稿"></el-option>
         </el-select>
       </el-form-item>
       <el-form-item>
-        <el-button @click="onSearch" type="primary">搜索</el-button>
-        <el-button @click="onReset" type="info" plain>重置</el-button>
+        <el-button @click="onSearch" type="primary">{{
+          t('article.search')
+        }}</el-button>
+        <el-button @click="onReset" type="info" plain>{{
+          t('article.reset')
+        }}</el-button>
       </el-form-item>
     </el-form>
 
     <div class="batch-bar" v-if="selectedRows.length > 0">
-      <span class="batch-count">已选择 {{ selectedRows.length }} 项</span>
+      <span class="batch-count">
+        {{ t('article.batchSelected', { count: selectedRows.length }) }}
+      </span>
       <el-button type="danger" :icon="Delete" @click="onBatchDelete">
-        批量删除
+        {{ t('article.batchDelete') }}
       </el-button>
     </div>
 
-    <el-table
-      :data="articleList"
-      v-loading="loading"
-      border
-      stripe
-      @selection-change="selectedRows = $event"
-    >
-      <el-table-column type="selection" width="48" />
-      <el-table-column label="文章标题" min-width="200">
-        <template #default="{ row }">
-          <el-link type="primary" :underline="false">{{ row.title }}</el-link>
-        </template>
-      </el-table-column>
-      <el-table-column
-        label="分类"
-        prop="cate_name"
-        width="120"
-      ></el-table-column>
-      <el-table-column label="发表时间" width="180">
-        <template #default="{ row }">
-          {{ formatTime(row.pub_date) }}
-        </template>
-      </el-table-column>
-      <el-table-column label="状态" width="100">
-        <template #default="{ row }">
-          <el-tag :type="row.state === '已发布' ? 'success' : 'info'">
-            {{ row.state }}
-          </el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column label="操作" width="120" fixed="right">
-        <template #default="{ row }">
-          <el-tooltip content="编辑文章" placement="top">
-            <el-button
-              circle
-              plain
-              type="primary"
-              :icon="Edit"
-              @click="onEditArticle(row)"
-            ></el-button>
-          </el-tooltip>
-          <el-tooltip content="删除文章" placement="top">
-            <el-button
-              circle
-              plain
-              type="danger"
-              :icon="Delete"
-              @click="onDeleteArticle(row)"
-            ></el-button>
-          </el-tooltip>
-        </template>
-      </el-table-column>
-    </el-table>
+    <SkeletonTable v-if="isFirstLoad && loading" :rows="5" :cols="5" checkbox />
+    <div v-else class="table-wrapper">
+      <el-table
+        :data="articleList"
+        v-loading="loading"
+        border
+        stripe
+        @selection-change="selectedRows = $event"
+      >
+        <el-table-column type="selection" width="48" />
+        <el-table-column :label="t('article.titleColumn')" min-width="200">
+          <template #default="{ row }">
+            <el-link type="primary" :underline="false">{{ row.title }}</el-link>
+          </template>
+        </el-table-column>
+        <el-table-column
+          :label="t('article.categoryColumn')"
+          prop="cate_name"
+          width="120"
+        ></el-table-column>
+        <el-table-column :label="t('article.pubDateColumn')" width="180">
+          <template #default="{ row }">
+            {{ formatTime(row.pub_date) }}
+          </template>
+        </el-table-column>
+        <el-table-column :label="t('article.statusColumn')" width="100">
+          <template #default="{ row }">
+            <el-tag :type="row.state === '已发布' ? 'success' : 'info'">
+              {{
+                row.state === '已发布'
+                  ? t('article.published')
+                  : t('article.draft')
+              }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column
+          :label="t('article.actionsColumn')"
+          width="120"
+          fixed="right"
+        >
+          <template #default="{ row }">
+            <el-tooltip :content="t('article.editArticle')" placement="top">
+              <el-button
+                circle
+                plain
+                type="primary"
+                :icon="Edit"
+                :aria-label="t('article.editArticle')"
+                @click="onEditArticle(row)"
+              ></el-button>
+            </el-tooltip>
+            <el-tooltip :content="t('article.deleteArticle')" placement="top">
+              <el-button
+                circle
+                plain
+                type="danger"
+                :icon="Delete"
+                :aria-label="t('article.deleteArticle')"
+                @click="onDeleteArticle(row)"
+              ></el-button>
+            </el-tooltip>
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
 
     <el-pagination
       v-model:current-page="params.pagenum"
@@ -226,5 +265,11 @@ const onSuccess = (type: string) => {
     color: var(--el-text-color-regular, #606266);
     font-size: 14px;
   }
+}
+
+/* 表格容器：小屏时横向滚动 */
+.table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 </style>

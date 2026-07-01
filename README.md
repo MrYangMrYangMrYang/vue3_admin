@@ -76,10 +76,13 @@
 
 ### 🎨 卓越的用户体验
 - ✅ **无闪烁页面切换**：智能 Loading 状态管理
+- ✅ **骨架屏加载态**：表格数据加载时展示 shimmer 骨架占位
 - ✅ **友好的错误提示**：所有操作失败都有明确的用户反馈
 - ✅ **登录体验优化**：成功后直接跳转到有数据的分类页
 - ✅ **退出登录提示**：安全退出的友好确认与提示
 - ✅ **GSAP 交互动画**：4 个动态角色实时追踪鼠标
+- ✅ **响应式布局**：适配桌面/平板/移动端，移动端侧边栏浮层交互
+- ✅ **无障碍优化**：ARIA label、语义化导航、键盘可访问性
 
 ### 🛡️ 健壮的错误处理
 - ✅ **Token 安全提取**：兼容多种后端响应格式
@@ -91,8 +94,10 @@
 - ✅ **Vite 分包优化**：manualChunks 拆分 vendor-vue/element/gsap/quill/axios 5 大包，入口文件 212KB→12KB（-94%）
 - ✅ **Gzip + Brotli 双压缩**：vite-plugin-compression 预压缩，大幅减少传输体积
 - ✅ **多环境配置**：.env.development / .env.production 环境变量注入
-- ✅ **Vitest 单元测试**：20 个用例覆盖 format 工具与 user store，核心逻辑覆盖率 100%
-- ✅ **Composables 抽离**：useRequest / useTable 通用 Hook 消除列表页样板代码
+- ✅ **Vitest 单元测试**：37 个用例覆盖 utils/stores/composables，核心逻辑覆盖率 100%
+- ✅ **Playwright E2E 测试**：12 个用例覆盖登录/导航/主题/国际化关键用户流程
+- ✅ **API 响应解包**：Axios interceptor 自动解包，消除 `res.data.data` 冗余访问
+- ✅ **Composables 抽离**：useRequest / useTable / useTheme / useI18n 通用 Hook
 - ✅ **GitHub Actions CI**：push/PR 自动触发 lint + test + build 流水线
 - ✅ **Docker 多阶段构建**：node 构建 + nginx 运行，一键容器化部署
 
@@ -102,8 +107,8 @@
 |------|------|------|
 | Performance（性能） | **96** | 优秀 |
 | Best Practices（最佳实践） | **100** | 完美 |
-| Accessibility（无障碍） | **88** | 良好 |
-| SEO | **70** | 及格（登录页 SPA 预渲染限制） |
+| Accessibility（无障碍） | **95** | 优秀 |
+| SEO | **75** | 良好（已补充 meta/OG 标签） |
 
 **关键性能指标**：FCP 0.9s · LCP 1.0s · TTI 1.0s · TBT 0ms
 
@@ -154,7 +159,8 @@
 
 ### 🌓 主题与国际化
 - ✅ 暗色/亮色主题切换（零依赖自实现 useTheme，localStorage 持久化 + 跟随系统偏好）
-- ✅ 中英文国际化（零依赖自实现 useI18n，响应式 t() 函数）
+- ✅ **完整中英文国际化**（零依赖自实现 useI18n，120+ key 全覆盖，支持参数插值）
+- ✅ **Element Plus 组件库国际化联动**（分页/空状态/上传等组件同步切换语言）
 - ✅ Element Plus 暗色主题自动适配
 
 ### 🧭 导航与体验增强
@@ -194,7 +200,8 @@
 | **ESLint 9** | ^9.37.0 | 代码质量检查（Flat Config + TS 支持） |
 | **Prettier** | 3.6.2 | 代码格式化工具 |
 | **Husky** | ^8.0.0 | Git Hooks 管理 |
-| **Vitest** | ^3.2.4 | 单元测试框架（jsdom + v8 coverage） |
+| **Vitest** | ^4.1.9 | 单元测试框架（jsdom + v8 coverage） |
+| **Playwright** | ^1.54 | E2E 测试框架（Chromium 浏览器自动化） |
 
 ---
 
@@ -210,6 +217,10 @@ vue3-big-event-admin/
 ├── public/                         # 静态资源目录
 │   └── favicon.svg                 # 网站图标
 ├── dist/                           # 构建输出目录（生产环境）
+├── e2e/                            # E2E 测试（Playwright）
+│   ├── login.spec.ts               # 登录流程测试
+│   ├── navigation.spec.ts          # 导航与布局测试
+│   └── theme-locale.spec.ts        # 主题与国际化测试
 ├── src/                            # 源代码目录
 │   ├── api/                       # API 接口层（Axios 封装）
 │   │   ├── article.ts             # 文章相关接口（9个 API）
@@ -223,13 +234,17 @@ vue3-big-event-admin/
 │   │   ├── AnimatedCharacters.vue # GSAP 动画组件（登录页角色）
 │   │   ├── AppBreadcrumb.vue      # 面包屑导航组件（基于路由 meta + i18n）
 │   │   ├── ErrorBoundary.vue      # 错误边界组件（捕获子树异常）
-│   │   └── PageContainer.vue      # 页面容器组件（标题+插槽）
+│   │   ├── PageContainer.vue      # 页面容器组件（标题+插槽）
+│   │   └── SkeletonTable.vue      # 骨架屏组件（shimmer 动画表格占位）
 │   │
 │   ├── composables/               # 可组合式函数（useRequest/useTable/useTheme/useI18n）
+│   │   ├── __tests__/             # composables 单元测试
+│   │   │   ├── useRequest.test.ts
+│   │   │   └── useTable.test.ts
 │   │   ├── useRequest.ts          # 通用请求 Hook（loading/error/data）
 │   │   ├── useTable.ts            # 列表页通用 Hook（分页+查询+CRUD）
 │   │   ├── useTheme.ts            # 主题切换 Hook（暗色/亮色 + 系统偏好）
-│   │   ├── useI18n.ts             # 国际化 Hook（零依赖自实现 t()）
+│   │   ├── useI18n.ts             # 国际化 Hook（零依赖自实现 t() + 参数插值）
 │   │   └── index.ts               # 统一导出
 │   │
 │   ├── locales/                   # 国际化语言包
@@ -242,12 +257,16 @@ vue3-big-event-admin/
 │   ├── stores/                    # Pinia 状态管理
 │   │   ├── index.ts               # Store 入口文件
 │   │   └── modules/               # 模块化 Store
+│   │       ├── __tests__/         # Store 单元测试
+│   │       │   └── user.test.ts
 │   │       └── user.ts            # 用户状态（Token + 用户信息）
 │   │
 │   ├── types/                     # TypeScript 类型定义 ⭐
 │   │   └── index.ts               # 全局类型接口（UserInfo, ArticleDetail 等）
 │   │
 │   ├── utils/                     # 工具函数库
+│   │   ├── __tests__/             # 工具函数单元测试
+│   │   │   └── format.test.ts
 │   │   ├── format.ts              # 时间格式化工具
 │   │   ├── request.ts             # Axios 实例封装 + 拦截器（注入 baseURL）
 │   │   └── requestCancel.ts       # 路由切换取消未完成请求（AbortController）
@@ -368,6 +387,18 @@ pnpm format
 
 # 类型检查（vue-tsc）
 npx vue-tsc --noEmit
+
+# 单元测试（Vitest，37 用例）
+pnpm test:run
+
+# 单元测试 + 覆盖率报告
+pnpm test:coverage
+
+# E2E 测试（Playwright，12 用例）
+pnpm test:e2e
+
+# E2E 测试 + UI 模式
+pnpm test:e2e:ui
 ```
 
 ---
@@ -613,13 +644,19 @@ docs(readme): 更新部署说明文档
 - [x] 2000+ 行 JSDoc 代码注释
 - [x] ESLint 9 + Prettier 代码规范体系
 - [x] 用户体验优化（无闪烁加载/友好提示）
-- [x] 单元测试（Vitest + jsdom，20 用例覆盖 format 工具与 user store）
-- [x] 国际化 (i18n) 支持（零依赖自实现 useI18n，中英双语）
+- [x] 单元测试（Vitest + jsdom，37 用例覆盖 utils/stores/composables）
+- [x] E2E 测试（Playwright，12 用例覆盖登录/导航/主题/国际化）
+- [x] 国际化 (i18n) 支持（零依赖自实现 useI18n，120+ key 全覆盖 + 参数插值）
+- [x] Element Plus 组件库国际化联动（分页/空状态/上传等同步切换）
 - [x] 暗色模式主题切换（零依赖自实现 useTheme + 跟随系统偏好）
 - [x] 构建分包优化（manualChunks 拆分 + Gzip/Brotli 双压缩，入口 -94%）
+- [x] API 响应解包（Interceptor 自动返回 ApiResponse，消除 res.data.data）
 - [x] Composables 抽离（useRequest / useTable 消除列表页样板代码）
 - [x] 全局错误处理（Axios 拦截器 + 401 自动跳转 + ErrorBoundary）
-- [x] 网络层增强（路由切换取消请求 + 多环境变量注入）
+- [x] 网络层增强（路由切换取消请求 + GET 自动重试 + 多环境变量注入）
+- [x] 骨架屏加载态（shimmer 动画表格占位，首次加载平滑过渡）
+- [x] 响应式布局（桌面/平板/移动端适配，移动端侧边栏浮层）
+- [x] 无障碍优化（ARIA label + 语义化导航 + 键盘可访问性）
 - [x] keep-alive 缓存列表页（切换保留分页与搜索状态）
 - [x] 面包屑导航（基于路由 meta + i18n 联动）
 - [x] 404 页面（catchAll 兜底路由）
@@ -631,7 +668,9 @@ docs(readme): 更新部署说明文档
 - 暂无
 
 ### 📌 计划中
-- [ ] E2E 测试（Playwright）
+- [ ] RBAC 权限控制（角色管理 + 按钮级权限）
+- [ ] Excel/PDF 数据导出
+- [ ] PWA 离线支持（Service Worker + Manifest）
 - [ ] RBAC 权限管理（角色/菜单权限）
 - [ ] 操作日志记录
 - [ ] 数据导出（Excel/PDF）

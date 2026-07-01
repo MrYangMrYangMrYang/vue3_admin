@@ -1,7 +1,10 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useUserStore } from '@/stores'
 import { userUpdateInfoService } from '@/api/user'
+import { useI18n } from '@/composables'
+
+const { t } = useI18n()
 
 const form = ref()
 
@@ -17,24 +20,24 @@ const user = ref({
   email
 })
 
-const rules = ref({
+const rules = computed(() => ({
   nickname: [
-    { required: true, message: '请输入用户昵称', trigger: 'blur' },
+    { required: true, message: t('profile.nicknameRequired'), trigger: 'blur' },
     {
       pattern: /^\S{2,7}$/,
-      message: '昵称长度在2-7个非空字符',
+      message: t('profile.nicknamePattern'),
       trigger: 'blur'
     }
   ],
   email: [
-    { required: true, message: '请输入用户邮箱', trigger: 'blur' },
+    { required: true, message: t('profile.emailRequired'), trigger: 'blur' },
     {
       type: 'email',
-      message: '请输入正确的邮箱格式',
+      message: t('profile.emailInvalid'),
       trigger: ['blur', 'change']
     }
   ]
-})
+}))
 
 const loading = ref(false)
 
@@ -44,7 +47,7 @@ const submitForm = async () => {
     loading.value = true
     await userUpdateInfoService(user.value)
     await getUser()
-    ElMessage.success({ message: '修改成功', duration: 1500 })
+    ElMessage.success({ message: t('profile.updateSuccess'), duration: 1500 })
   } catch {
     // 校验失败或接口报错处理
   } finally {
@@ -53,28 +56,28 @@ const submitForm = async () => {
 }
 </script>
 <template>
-  <page-container title="基本资料">
+  <page-container :title="t('profile.title')">
     <div class="form-wrapper">
       <el-form ref="form" :model="user" :rules="rules" label-width="100px">
-        <el-form-item label="账号名称">
+        <el-form-item :label="t('profile.account')">
           <el-input v-model="user.username" disabled></el-input>
         </el-form-item>
-        <el-form-item label="用户昵称" prop="nickname">
+        <el-form-item :label="t('profile.nickname')" prop="nickname">
           <el-input
             v-model="user.nickname"
-            placeholder="请输入用户昵称"
+            :placeholder="t('profile.nicknamePlaceholder')"
           ></el-input>
         </el-form-item>
-        <el-form-item label="用户邮箱" prop="email">
+        <el-form-item :label="t('profile.email')" prop="email">
           <el-input
             v-model="user.email"
-            placeholder="请输入用户邮箱"
+            :placeholder="t('profile.emailPlaceholder')"
           ></el-input>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="submitForm" :loading="loading"
-            >提交修改</el-button
-          >
+          <el-button type="primary" @click="submitForm" :loading="loading">
+            {{ t('profile.submit') }}
+          </el-button>
         </el-form-item>
       </el-form>
     </div>

@@ -37,7 +37,7 @@ export interface UseTableOptions<P, R> {
   immediate?: boolean
   /**
    * 自定义响应数据提取
-   * @description 默认从 res.data.data.{data, total} 提取，不符合时用此函数覆盖
+   * @description 默认从 res.data.{data, total} 提取，不符合时用此函数覆盖
    */
   transform?: (res: unknown) => { list: R[]; total: number }
 }
@@ -75,7 +75,7 @@ export interface UseTableReturn<P extends PageParams, R> {
  * @returns 列表状态与分页操作方法
  *
  * @remarks
- * **默认响应结构**（后端 API 标准）：
+ * **默认响应结构**（后端 API 标准，已解包 AxiosResponse）：
  * ```json
  * { "data": { "data": [...], "total": 100 } }
  * ```
@@ -121,11 +121,9 @@ export function useTable<P extends PageParams, R>(
         list.value = result.list
         total.value = result.total
       } else {
-        // 默认从 res.data.data.{data, total} 提取（后端 API 标准结构）
+        // 默认从 res.data.{data, total} 提取（后端 API 标准结构，已解包 AxiosResponse）
         // 使用可选链兜底，避免后端返回结构异常时整页崩溃
-        const payload = (
-          res as { data?: { data?: { data?: R[]; total?: number } } }
-        )?.data?.data
+        const payload = (res as { data?: { data?: R[]; total?: number } })?.data
         list.value = payload?.data ?? []
         total.value = payload?.total ?? 0
       }
