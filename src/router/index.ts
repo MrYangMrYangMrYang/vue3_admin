@@ -100,7 +100,7 @@ router.beforeEach(async (to) => {
 
   // 已登录访问登录页 → 跳转首页（防止浏览器回退到登录页）
   if (userStore.token && to.path === '/login') {
-    return false
+    return '/article/channel'
   }
 
   // RBAC 权限检查
