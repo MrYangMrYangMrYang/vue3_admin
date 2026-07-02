@@ -113,12 +113,12 @@ const ROLES = [
     id: 2,
     name: 'editor',
     label: '编辑者',
-    description: '管理文章内容，查看分类',
+    description: '文章增删改查，无分类管理权限',
     permissions: [
       'article:read',
       'article:create',
       'article:delete',
-      'channel:read'
+      'user:profile'
     ]
   },
   {

@@ -30,7 +30,7 @@ export default {
   'login.success': '登录成功',
   'login.registerSuccess': '注册成功',
   'login.role': '选择角色',
-  'login.roleEditor': '编辑者 — 可管理文章内容',
+  'login.roleEditor': '编辑者 — 文章增删改查',
   'login.roleViewer': '访客 — 仅可浏览查看',
   'login.failed': '登录失败，请重试',
   'login.registerFailed': '注册失败，请重试',

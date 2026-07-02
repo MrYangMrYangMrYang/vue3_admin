@@ -31,7 +31,7 @@ export default {
   'login.success': 'Login successful',
   'login.registerSuccess': 'Registration successful',
   'login.role': 'Select Role',
-  'login.roleEditor': 'Editor — Manage articles',
+  'login.roleEditor': 'Editor — Article CRUD',
   'login.roleViewer': 'Viewer — Read only',
   'login.failed': 'Login failed, please retry',
   'login.registerFailed': 'Registration failed, please retry',
