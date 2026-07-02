@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from 'vitest'
-import { formatTime } from '../format'
+import { formatTime, getErrorMessage } from '../format'
 
 describe('formatTime 日期格式化函数', () => {
   describe('正常输入', () => {
@@ -58,5 +58,37 @@ describe('formatTime 日期格式化函数', () => {
     it('双位数月份和日期不应补零', () => {
       expect(formatTime('2024-11-25')).toBe('2024年11月25日')
     })
+  })
+})
+
+describe('getErrorMessage 错误消息提取函数', () => {
+  it('应从 Error 实例提取 message', () => {
+    expect(getErrorMessage(new Error('网络超时'))).toBe('网络超时')
+  })
+
+  it('应从纯字符串返回原值', () => {
+    expect(getErrorMessage('请求失败')).toBe('请求失败')
+  })
+
+  it('应从含 message 属性的普通对象提取', () => {
+    expect(getErrorMessage({ message: '服务器错误', code: 500 })).toBe(
+      '服务器错误'
+    )
+  })
+
+  it('无法提取时应返回默认 fallback 值', () => {
+    expect(getErrorMessage(null)).toBe('操作失败')
+  })
+
+  it('无法提取时应返回自定义 fallback 值', () => {
+    expect(getErrorMessage(undefined, '自定义错误')).toBe('自定义错误')
+  })
+
+  it('应处理空对象', () => {
+    expect(getErrorMessage({})).toBe('操作失败')
+  })
+
+  it('应处理数字类型', () => {
+    expect(getErrorMessage(404, '未知错误')).toBe('未知错误')
   })
 })

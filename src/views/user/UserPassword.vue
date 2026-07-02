@@ -3,9 +3,9 @@ import { ref, computed } from 'vue'
 import { userUpdatePasswordService } from '@/api/user'
 import { UpdatePasswordData } from '@/types'
 import { useUserStore } from '@/stores'
-import type { UserInfo } from '@/types'
 import { useRouter } from 'vue-router'
 import { useI18n } from '@/composables'
+import { getErrorMessage } from '@/utils/format'
 
 const { t } = useI18n()
 
@@ -70,15 +70,18 @@ const loading = ref(false)
 const submitForm = async () => {
   try {
     await form.value.validate()
+  } catch {
+    return // 校验失败由表单自身展示红色提示，不弹消息
+  }
+
+  try {
     loading.value = true
     await userUpdatePasswordService(pwdForm.value)
     ElMessage.success({ message: t('password.success'), duration: 1500 })
-    // 修改成功后清除 token 和用户信息，跳转至登录页重新登录
-    userStore.setToken('')
-    userStore.setUser({} as UserInfo)
+    userStore.removeToken()
     router.push('/login')
-  } catch {
-    // 校验失败或接口报错
+  } catch (err: unknown) {
+    ElMessage.error(getErrorMessage(err, t('password.failed')))
   } finally {
     loading.value = false
   }

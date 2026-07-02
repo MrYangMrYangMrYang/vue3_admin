@@ -10,7 +10,6 @@ import axios, {
 import { useUserStore } from '@/stores'
 import { ElMessage } from 'element-plus'
 import router from '@/router'
-import type { UserInfo } from '@/types'
 import { addPending, removePending } from './requestCancel'
 
 /** 扩展 axios 请求配置：追加重试计数字段，用于网络错误/5xx 自动重试 */
@@ -38,7 +37,7 @@ instance.interceptors.request.use(
     const useStore = useUserStore()
 
     if (useStore.token) {
-      config.headers.Authorization = useStore.token
+      config.headers.Authorization = `Bearer ${useStore.token}`
     }
 
     // 注册到 pending 池（仅 GET 请求），支持路由切换时取消
@@ -96,11 +95,10 @@ instance.interceptors.response.use(
       })
     }
 
-    // 401 未授权：必须同时清除 token 和 user，避免残留过期数据导致下次进入仍显示旧用户
+    // 401 未授权：清空 token 和用户信息，避免残留过期数据导致下次进入仍显示旧用户
     if (axiosErr.response?.status === 401) {
       const userStore = useUserStore()
       userStore.removeToken()
-      userStore.setUser({} as UserInfo)
       router.push('/login')
     }
 

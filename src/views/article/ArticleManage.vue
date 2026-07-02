@@ -1,23 +1,35 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, nextTick } from 'vue'
+import { useRoute } from 'vue-router'
 import { Delete, Edit } from '@element-plus/icons-vue'
 import ChannelSelect from './components/ChannelSelect.vue'
 import ArticleEdit from './components/ArticleEdit.vue'
 import { artGetListService, artDelService } from '@/api/article'
-import { formatTime } from '@/utils/format'
+import { formatTime, getErrorMessage } from '@/utils/format'
 import { useTable, useI18n } from '@/composables'
 import type { ArticleDetail } from '@/types'
 import SkeletonTable from '@/components/SkeletonTable.vue'
 
 const { t } = useI18n()
 
+/** 文章发布状态常量（值与后端 API 约定一致） */
+const STATE_PUBLISHED = '已发布'
+const STATE_DRAFT = '草稿'
+
 /** 组件名（供 keep-alive include 匹配，缓存列表页状态） */
 defineOptions({ name: 'article-manage' })
+
+const route = useRoute()
 
 /** 首次加载使用骨架屏，后续刷新用 v-loading */
 const isFirstLoad = ref(true)
 
-// useTable 自动管理 list/total/loading/params 与分页/搜索/重置逻辑
+// 从 URL query 读取初始筛选状态（支持浏览器刷新恢复、链接分享）
+const urlCateId = (route.query.cate_id as string) || ''
+const urlState = (route.query.state as string) || ''
+const urlPageNum = parseInt(route.query.pagenum as string) || 1
+const urlPageSize = parseInt(route.query.pagesize as string) || 5
+
 const {
   list: articleList,
   total,
@@ -32,13 +44,31 @@ const {
   { pagenum: number; pagesize: number; cate_id: string; state: string },
   ArticleDetail
 >(artGetListService, {
-  initialParams: { cate_id: '', state: '' },
-  initialPageSize: 5
+  initialParams: {
+    cate_id: urlCateId,
+    state: urlState,
+    pagenum: urlPageNum
+  } as Record<string, string | number>,
+  initialPageSize: urlPageSize
 })
 
-// 首次加载完成 → 关闭骨架屏，后续切换回 v-loading
+/** params → URL query 延迟同步（请求完成后再更新 URL，彻底避免竞态） */
+const syncURL = () => {
+  const p = params.value
+  const q = new URLSearchParams()
+  if (p.pagenum > 1) q.set('pagenum', String(p.pagenum))
+  if (p.pagesize !== 5) q.set('pagesize', String(p.pagesize))
+  if (p.cate_id) q.set('cate_id', p.cate_id)
+  if (p.state) q.set('state', p.state)
+  const qs = q.toString()
+  history.replaceState(null, '', route.path + (qs ? '?' + qs : ''))
+}
+
 watch(loading, (val) => {
-  if (!val) isFirstLoad.value = false
+  if (!val) {
+    isFirstLoad.value = false
+    syncURL()
+  }
 })
 
 const articleEdit = ref()
@@ -62,19 +92,25 @@ const onDeleteArticle = async (row: ArticleDetail) => {
         type: 'warning'
       }
     )
+  } catch {
+    // 用户取消删除
+    return
+  }
+
+  try {
     await artDelService(row.id)
     ElMessage.success(t('article.deleteSuccess'))
     getArticleList()
-  } catch {
-    // 取消删除或请求失败
+  } catch (err: unknown) {
+    ElMessage.error(getErrorMessage(err, t('article.deleteFailed')))
   }
 }
 
 const selectedRows = ref<ArticleDetail[]>([])
 
-// 后端 API 无批量删除接口，用 Promise.allSettled 并发调用单个删除
 const onBatchDelete = async () => {
   if (selectedRows.value.length === 0) return
+
   try {
     await ElMessageBox.confirm(
       t('article.batchDeleteConfirm', { count: selectedRows.value.length }),
@@ -85,33 +121,34 @@ const onBatchDelete = async () => {
         type: 'warning'
       }
     )
-    const results = await Promise.allSettled(
-      selectedRows.value.map((row) => artDelService(row.id))
-    )
-    const successCount = results.filter((r) => r.status === 'fulfilled').length
-    const failCount = results.length - successCount
-    if (failCount === 0) {
-      ElMessage.success(
-        t('article.batchDeleteSuccess', { count: successCount })
-      )
-    } else {
-      ElMessage.warning(
-        t('article.batchDeletePartial', {
-          success: successCount,
-          fail: failCount
-        })
-      )
-    }
-    selectedRows.value = []
-    getArticleList()
   } catch {
     // 用户取消批量删除
+    return
   }
+
+  const results = await Promise.allSettled(
+    selectedRows.value.map((row) => artDelService(row.id))
+  )
+  const successCount = results.filter((r) => r.status === 'fulfilled').length
+  const failCount = results.length - successCount
+
+  if (failCount === 0) {
+    ElMessage.success(t('article.batchDeleteSuccess', { count: successCount }))
+  } else {
+    ElMessage.warning(
+      t('article.batchDeletePartial', {
+        success: successCount,
+        fail: failCount
+      })
+    )
+  }
+
+  selectedRows.value = []
+  getArticleList()
 }
 
 const onSuccess = (type: string) => {
   if (type === 'add') {
-    // 添加成功，跳转到最后一页
     const lastPage = Math.ceil((total.value + 1) / params.value.pagesize)
     params.value.pagenum = lastPage
   }
@@ -138,8 +175,14 @@ const onSuccess = (type: string) => {
           :placeholder="t('article.statusLabel')"
           style="width: 200px"
         >
-          <el-option :label="t('article.published')" value="已发布"></el-option>
-          <el-option :label="t('article.draft')" value="草稿"></el-option>
+          <el-option
+            :label="t('article.published')"
+            :value="STATE_PUBLISHED"
+          ></el-option>
+          <el-option
+            :label="t('article.draft')"
+            :value="STATE_DRAFT"
+          ></el-option>
         </el-select>
       </el-form-item>
       <el-form-item>
@@ -188,9 +231,9 @@ const onSuccess = (type: string) => {
         </el-table-column>
         <el-table-column :label="t('article.statusColumn')" width="100">
           <template #default="{ row }">
-            <el-tag :type="row.state === '已发布' ? 'success' : 'info'">
+            <el-tag :type="row.state === STATE_PUBLISHED ? 'success' : 'info'">
               {{
-                row.state === '已发布'
+                row.state === STATE_PUBLISHED
                   ? t('article.published')
                   : t('article.draft')
               }}
@@ -267,7 +310,6 @@ const onSuccess = (type: string) => {
   }
 }
 
-/* 表格容器：小屏时横向滚动 */
 .table-wrapper {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;

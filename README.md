@@ -66,7 +66,8 @@
 - ✅ **集中式类型定义**：`src/types/index.ts` 统一管理接口类型
 - ✅ **API 响应类型化**：所有接口返回值都有完整的泛型约束
 - ✅ **组件 Props 类型化**：Vue 组件属性全部类型安全
-- ✅ **0 个类型错误**：通过 `vue-tsc` 类型检查验证
+- ✅ **0 个 `{} as Type` 断言**：所有类型均为合法的运行时值，拒绝假类型安全
+- ✅ **空值语义化**：`UserInfo | null` 替代 `{} as UserInfo`，`Store.displayName` 安全获取
 
 ### 📚 企业级代码文档
 - ✅ **2000+ 行 JSDoc 注释**：覆盖所有核心模块
@@ -80,22 +81,25 @@
 - ✅ **友好的错误提示**：所有操作失败都有明确的用户反馈
 - ✅ **登录体验优化**：成功后直接跳转到有数据的分类页
 - ✅ **退出登录提示**：安全退出的友好确认与提示
+- ✅ **URL 状态持久化**：列表页分页/筛选参数同步到 URL，刷新不丢失、可分享链接
 - ✅ **GSAP 交互动画**：4 个动态角色实时追踪鼠标
 - ✅ **响应式布局**：适配桌面/平板/移动端，移动端侧边栏浮层交互
 - ✅ **无障碍优化**：ARIA label、语义化导航、键盘可访问性
 
 ### 🛡️ 健壮的错误处理
+- ✅ **全链路错误反馈**：注册、删除、修改资料、上传头像、修改密码等所有操作失败均有明确提示
+- ✅ **取消 vs 错误严格区分**：`ElMessageBox` 取消静默返回，API 错误弹出提示
 - ✅ **Token 安全提取**：兼容多种后端响应格式
-- ✅ **全局异常捕获**：Axios 拦截器统一处理 HTTP 错误
-- ✅ **401 自动跳转**：Token 过期自动返回登录页
+- ✅ **全局异常捕获**：Axios 拦截器统一处理 HTTP 错误，GET 请求自动重试
+- ✅ **401 自动跳转**：Token 过期自动返回登录页，同时清空 store 避免残余数据
 - ✅ **表单校验完善**：注册/登录/密码修改都有完整校验
 
 ### ⚡ 构建性能与工程化
 - ✅ **Vite 分包优化**：manualChunks 拆分 vendor-vue/element/gsap/quill/axios 5 大包，入口文件 212KB→12KB（-94%）
 - ✅ **Gzip + Brotli 双压缩**：vite-plugin-compression 预压缩，大幅减少传输体积
 - ✅ **多环境配置**：.env.development / .env.production 环境变量注入
-- ✅ **Vitest 单元测试**：37 个用例覆盖 utils/stores/composables，核心逻辑覆盖率 100%
-- ✅ **Playwright E2E 测试**：12 个用例覆盖登录/导航/主题/国际化关键用户流程
+- ✅ **Vitest 单元测试**：62 个用例覆盖 utils/stores/composables/i18n/theme，核心逻辑层 100%
+- ✅ **Playwright E2E 测试**：15 个用例覆盖登录/导航/主题/国际化，Chromium + Firefox + 移动端三端验证
 - ✅ **API 响应解包**：Axios interceptor 自动解包，消除 `res.data.data` 冗余访问
 - ✅ **Composables 抽离**：useRequest / useTable / useTheme / useI18n 通用 Hook
 - ✅ **GitHub Actions CI**：push/PR 自动触发 lint + test + build 流水线
@@ -364,7 +368,7 @@ pnpm dev
 - 用户名：`admin`
 - 密码：`123456`
 
-> 📝 后端 API 地址已配置为：`https://big-event-vue-api-t.itheima.net`
+> 📝 开发环境使用本地 Mock Server（`pnpm mock`），无需外部 API。
 
 ### 生产环境构建
 
@@ -388,13 +392,13 @@ pnpm format
 # 类型检查（vue-tsc）
 npx vue-tsc --noEmit
 
-# 单元测试（Vitest，37 用例）
+# 单元测试（Vitest，62 用例）
 pnpm test:run
 
 # 单元测试 + 覆盖率报告
 pnpm test:coverage
 
-# E2E 测试（Playwright，12 用例）
+# E2E 测试（Playwright，15 用例 · Chromium + Firefox + Pixel 5）
 pnpm test:e2e
 
 # E2E 测试 + UI 模式
@@ -411,8 +415,8 @@ pnpm test:e2e:ui
 
 | 文件 | 作用 | 示例值 |
 | :--- | :--- | :--- |
-| `.env.development` | 开发环境（`pnpm dev` 加载） | `VITE_API_BASE_URL=https://big-event-vue-api-t.itheima.net` |
-| `.env.production` | 生产环境（`pnpm build` 加载） | `VITE_API_BASE_URL=https://big-event-vue-api-t.itheima.net` |
+| `.env.development` | 开发环境（`pnpm dev` 加载） | `VITE_API_BASE_URL=http://localhost:3000`（本地 Mock） |
+| `.env.production` | 生产环境（`pnpm build` 加载） | `VITE_API_BASE_URL=`（部署时填入实际后端地址） |
 
 在 [src/utils/request.ts](src/utils/request.ts) 中通过 `import.meta.env` 注入：
 
@@ -644,9 +648,9 @@ docs(readme): 更新部署说明文档
 - [x] 2000+ 行 JSDoc 代码注释
 - [x] ESLint 9 + Prettier 代码规范体系
 - [x] 用户体验优化（无闪烁加载/友好提示）
-- [x] 单元测试（Vitest + jsdom，37 用例覆盖 utils/stores/composables）
-- [x] E2E 测试（Playwright，12 用例覆盖登录/导航/主题/国际化）
-- [x] 国际化 (i18n) 支持（零依赖自实现 useI18n，120+ key 全覆盖 + 参数插值）
+- [x] 单元测试（Vitest + jsdom，62 用例覆盖 utils/stores/composables/i18n/theme）
+- [x] E2E 测试（Playwright，15 用例 · 3 浏览器端 · CI 集成）
+- [x] 国际化 (i18n) 支持（零依赖自实现 useI18n，174 key 全覆盖 + 参数插值）
 - [x] Element Plus 组件库国际化联动（分页/空状态/上传等同步切换）
 - [x] 暗色模式主题切换（零依赖自实现 useTheme + 跟随系统偏好）
 - [x] 构建分包优化（manualChunks 拆分 + Gzip/Brotli 双压缩，入口 -94%）

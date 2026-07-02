@@ -127,6 +127,12 @@ export function useTable<P extends PageParams, R>(
         list.value = payload?.data ?? []
         total.value = payload?.total ?? 0
       }
+
+      // 删除最后一页全部数据后自动回退到有效页
+      if (list.value.length === 0 && params.value.pagenum > 1) {
+        params.value.pagenum -= 1
+        return getList()
+      }
     } finally {
       loading.value = false
     }

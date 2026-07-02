@@ -16,7 +16,6 @@ import {
 } from '@element-plus/icons-vue'
 import avatar from '@/assets/default.png'
 import { useUserStore } from '@/stores'
-import type { UserInfo } from '@/types'
 import { onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useTheme } from '@/composables/useTheme'
@@ -75,7 +74,6 @@ const handleCommand = async (key: string) => {
       return
     }
     userStore.removeToken()
-    userStore.setUser({} as UserInfo)
     ElMessage.success({
       message: t('common.logoutSuccess'),
       duration: 1500,
@@ -183,7 +181,7 @@ const onMenuSelect = () => {
           </el-icon>
           <div class="user-info">
             {{ t('menu.manager') }}：<strong>{{
-              userStore.user.nickname || userStore.user.username
+              userStore.displayName
             }}</strong>
           </div>
         </div>
@@ -220,7 +218,7 @@ const onMenuSelect = () => {
           </el-tooltip>
           <el-dropdown placement="bottom-end" @command="handleCommand">
             <span class="el-dropdown__box" aria-label="用户菜单">
-              <el-avatar :src="userStore.user.user_pic || avatar" />
+              <el-avatar :src="userStore.avatar || avatar" />
               <el-icon><CaretBottom /></el-icon>
             </span>
             <template #dropdown>

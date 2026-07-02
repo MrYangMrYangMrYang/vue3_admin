@@ -35,5 +35,21 @@ jobs:
       - name: Unit test
         run: pnpm test:run
 
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium firefox
+
+      - name: E2E test
+        run: pnpm test:e2e
+
+      - name: Upload E2E report (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+
       - name: Build
         run: pnpm build
+
+      - name: Docker build (smoke check)
+        run: docker build -t big-event-admin .

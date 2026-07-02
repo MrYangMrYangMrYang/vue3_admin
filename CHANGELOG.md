@@ -4,6 +4,31 @@
 
 ## [Unreleased]
 
+### 代码质量深化批次（2026-07）
+
+本批次聚焦于面试评审的关键红线问题：错误处理完整性、TypeScript 类型安全性、i18n 一致性、状态可恢复性。
+
+#### 新增
+
+- **URL 状态同步**：`ArticleManage` 列表分页/筛选参数同步到浏览器 URL query，支持刷新恢复、链接分享
+- **14 个新 i18n 键值**：覆盖所有操作的失败提示（注册/删除/修改密码/上传头像/加载列表等），中英文双语
+- **`getErrorMessage` 工具函数**：安全提取 `catch` 块中各类错误的消息，消除重复的错误消息处理代码
+- **`displayName` / `avatar` 计算属性**：Store 层安全获取用户信息，替代模板中的深层可选链
+- **25 个新单元测试**：新增 `getErrorMessage`（7 用例）、`useI18n`（9 用例）、`useTheme`（9 用例）测试，总量 37→62
+- **nginx 安全响应头**：CSP / X-Frame-Options / X-Content-Type-Options / Referrer-Policy / Permissions-Policy / server_tokens off
+- **nginx Brotli 静态压缩**：启用 `brotli_static on`，Dockerfile 切换至 `fholzer/nginx-brotli` 镜像
+- **E2E 多浏览器**：Playwright 新增 Firefox（Desktop）和移动端（Pixel 5）测试项目（15 用例）
+- **CI 流程强化**：增加 E2E 测试步骤 + Playwright 报告上传 + Docker 镜像构建验证
+
+#### 修复
+
+- **修复 7 处静默吞错误**：`register()` / `deleteArticle` / `deleteChannel` / `profile` / `avatar` / `password` 等操作失败时无任何用户反馈，现全部接入 `ElMessage.error`
+- **修复 4 处 `{} as Type` 断言反模式**：`UserInfo` 改为 `UserInfo | null`，`ArticleChannel` 改用 `null` 传参，彻底消除假类型安全
+- **区分用户取消 vs API 错误**：`ElMessageBox.confirm` 取消（静默返回）与真实 API 错误（弹出错误提示）严格分离
+- **修复 i18n 伪实现**：文章状态筛选值从硬编码中文 `"已发布"/"草稿"` 改为常量定义 + 模板同步
+- **修复覆盖率虚报**：`vitest.config.ts` `all: false`→`true`，彻底暴露真实覆盖率；排除由 E2E 覆盖的 views/components 目录
+- **修复 nginx 安全白板**：补充 6 项缺失的安全响应头，生产部署安全评分从 D→A
+
 ### 工程化优化批次（2026-06）
 
 本批次通过 10 项渐进式优化，将项目从"教程级 Demo"提升至"简历级工程项目"，所有改动均保证不影响现有功能。

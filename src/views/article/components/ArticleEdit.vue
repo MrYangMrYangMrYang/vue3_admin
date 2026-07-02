@@ -13,6 +13,7 @@ import {
 import { baseURL } from '@/utils/request'
 import axios from 'axios'
 import { useI18n } from '@/composables'
+import { getErrorMessage } from '@/utils/format'
 
 const { t } = useI18n()
 
@@ -65,7 +66,6 @@ const rules = computed(() => ({
         value: string,
         callback: (error?: Error) => void
       ) => {
-        // 去除 HTML 标签后验证纯文本内容
         const textContent = value ? value.replace(/<[^>]*>/g, '').trim() : ''
         if (!textContent) {
           callback(new Error(t('article.contentRequired')))
@@ -86,16 +86,11 @@ const onSelectFile = (uploadFile: UploadFile) => {
   if (!uploadFile.raw) return
   imgUrl.value = URL.createObjectURL(uploadFile.raw)
   formModel.value.cover_img = uploadFile.raw
-  // 文件变更不会自动触发表单校验，需手动触发
   nextTick(() => {
     form.value?.validateField('cover_img')
   })
 }
 
-/**
- * 将网络图片地址转换为 File 对象
- * 用于编辑文章时将回显的图片 URL 转换为后端所需的 File 格式
- */
 async function imageUrlToFileObject(
   imageUrl: string,
   filename: string
@@ -117,11 +112,17 @@ async function imageUrlToFileObject(
 
 const emit = defineEmits(['success'])
 
+const publishing = ref(false)
+
 const onPublish = async (state: string) => {
-  await form.value.validate()
+  try {
+    await form.value.validate()
+  } catch {
+    return
+  }
+
   formModel.value.state = state
 
-  // 接口要求 multipart/form-data 格式
   const fd = new FormData()
   fd.append('title', formModel.value.title)
   fd.append('cate_id', String(formModel.value.cate_id))
@@ -133,39 +134,42 @@ const onPublish = async (state: string) => {
     fd.append('cover_img', formModel.value.cover_img as string)
   }
 
-  if (formModel.value.id) {
-    fd.append('id', String(formModel.value.id))
-    await artEditService(fd)
-    ElMessage.success(t('article.editSuccess'))
-    visibleDrawer.value = false
-    emit('success', 'edit')
-  } else {
-    await artPublishService(fd)
-    ElMessage.success(t('article.addSuccess'))
-    visibleDrawer.value = false
-    emit('success', 'add')
+  publishing.value = true
+  try {
+    if (formModel.value.id) {
+      fd.append('id', String(formModel.value.id))
+      await artEditService(fd)
+      ElMessage.success(t('article.editSuccess'))
+      visibleDrawer.value = false
+      emit('success', 'edit')
+    } else {
+      await artPublishService(fd)
+      ElMessage.success(t('article.addSuccess'))
+      visibleDrawer.value = false
+      emit('success', 'add')
+    }
+  } catch (err: unknown) {
+    ElMessage.error(getErrorMessage(err, t('article.publishFailed')))
+  } finally {
+    publishing.value = false
   }
 }
 
 const editor = ref()
 
-/**
- * 打开抽屉
- * @param obj 文章对象。包含 id 时为编辑模式，否则为发布模式
- */
 const open = async (obj: Partial<ArticleFormModel>) => {
   visibleDrawer.value = true
   await nextTick()
 
   if (obj.id) {
-    // 编辑模式：拉取详情并回显，将封面 URL 转换为 File 对象
     const res = await artGetDetailService(obj.id!)
     const data = res.data
+    // 先保留原始 URL 作为 cover_img 兜底值，imageUrlToFileObject 失败时不丢
     formModel.value = {
       id: data.id,
       title: data.title,
       cate_id: data.cate_id,
-      cover_img: '',
+      cover_img: data.cover_img,
       content: data.content,
       state: data.state
     }
@@ -175,7 +179,6 @@ const open = async (obj: Partial<ArticleFormModel>) => {
       formModel.value.cover_img = file
     }
   } else {
-    // 发布模式：清空数据
     formModel.value = {
       title: '',
       cate_id: '',
@@ -217,7 +220,6 @@ defineExpose({
         <ChannelSelect v-model="formModel.cate_id" width="100%"></ChannelSelect>
       </el-form-item>
       <el-form-item :label="t('article.coverLabel')" prop="cover_img">
-        <!-- 关闭自动上传，仅做前端本地预览；提交时再随 FormData 上传 -->
         <el-upload
           class="avatar-uploader"
           :show-file-list="false"
@@ -241,12 +243,18 @@ defineExpose({
         </div>
       </el-form-item>
       <el-form-item>
-        <el-button @click="onPublish('已发布')" type="primary">{{
-          t('article.publish')
-        }}</el-button>
-        <el-button @click="onPublish('草稿')" type="info">{{
-          t('article.saveDraft')
-        }}</el-button>
+        <el-button
+          @click="onPublish('已发布')"
+          type="primary"
+          :loading="publishing"
+          >{{ t('article.publish') }}</el-button
+        >
+        <el-button
+          @click="onPublish('草稿')"
+          type="info"
+          :loading="publishing"
+          >{{ t('article.saveDraft') }}</el-button
+        >
       </el-form-item>
     </el-form>
   </el-drawer>

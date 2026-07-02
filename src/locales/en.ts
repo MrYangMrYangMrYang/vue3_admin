@@ -31,6 +31,7 @@ export default {
   'login.success': 'Login successful',
   'login.registerSuccess': 'Registration successful',
   'login.failed': 'Login failed, please retry',
+  'login.registerFailed': 'Registration failed, please retry',
   'login.tokenMissing': 'No token received in login response',
   'login.usernameRequired': 'Please enter your username',
   'login.usernamePattern': 'Username must be 2–7 non-whitespace characters',
@@ -76,6 +77,7 @@ export default {
   'article.delete': 'Delete',
   'article.cancel': 'Cancel',
   'article.deleteSuccess': 'Deleted successfully',
+  'article.deleteFailed': 'Failed to delete article',
   'article.batchDeleteConfirm':
     'Are you sure to delete {count} articles? This action cannot be undone.',
   'article.batchDeleteTitle': 'Batch Delete Confirmation',
@@ -97,6 +99,7 @@ export default {
   'article.saveDraft': 'Save Draft',
   'article.editSuccess': 'Updated successfully',
   'article.addSuccess': 'Added successfully',
+  'article.publishFailed': 'Failed to publish, please retry',
   'article.imageConvertFailed': 'Image conversion failed',
 
   // ─── Category Management ─────────────────────────
@@ -114,6 +117,8 @@ export default {
   'channel.delete': 'Delete',
   'channel.cancel': 'Cancel',
   'channel.deleteSuccess': 'Deleted successfully',
+  'channel.deleteFailed': 'Failed to delete category',
+  'channel.loadFailed': 'Failed to load categories',
   'channel.noData': 'No Data',
   'channel.editTitle': 'Edit Category',
   'channel.addTitle': 'Add Category',
@@ -127,6 +132,7 @@ export default {
   'channel.aliasPattern': 'Must be 2–15 alphanumeric characters',
   'channel.editSuccess': 'Updated successfully',
   'channel.addSuccess': 'Added successfully',
+  'channel.addFailed': 'Operation failed, please retry',
   'channel.confirm': 'Confirm',
 
   // ─── Profile ──────────────────────────────────────
@@ -142,12 +148,15 @@ export default {
   'profile.emailRequired': 'Please enter your email',
   'profile.emailInvalid': 'Please enter a valid email address',
   'profile.updateSuccess': 'Updated successfully',
+  'profile.updateFailed': 'Update failed, please retry',
 
   // ─── Avatar ───────────────────────────────────────
   'avatar.title': 'Change Avatar',
   'avatar.selectImage': 'Select Image',
   'avatar.upload': 'Upload Avatar',
   'avatar.success': 'Avatar updated successfully',
+  'avatar.failed': 'Avatar upload failed',
+  'avatar.noFileSelected': 'Please select an image first',
 
   // ─── Password ─────────────────────────────────────
   'password.title': 'Change Password',
@@ -168,6 +177,7 @@ export default {
   'password.notSame': 'New password must differ from current password',
   'password.mustMatch': 'Confirmation must match new password',
   'password.success': 'Password changed successfully',
+  'password.failed': 'Password change failed, please retry',
 
   // ─── Theme & Locale ───────────────────────────────
   'theme.dark': 'Dark Mode',

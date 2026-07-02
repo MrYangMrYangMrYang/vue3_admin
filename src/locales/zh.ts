@@ -30,6 +30,7 @@ export default {
   'login.success': '登录成功',
   'login.registerSuccess': '注册成功',
   'login.failed': '登录失败，请重试',
+  'login.registerFailed': '注册失败，请重试',
   'login.tokenMissing': '登录响应中未获取到 Token',
   'login.usernameRequired': '请输入用户名',
   'login.usernamePattern': '用户名必须是2-7位的非空字符',
@@ -74,6 +75,7 @@ export default {
   'article.delete': '删除',
   'article.cancel': '取消',
   'article.deleteSuccess': '删除成功',
+  'article.deleteFailed': '删除文章失败',
   'article.batchDeleteConfirm':
     '确定要删除选中的 {count} 篇文章吗？删除后无法恢复。',
   'article.batchDeleteTitle': '批量删除确认',
@@ -95,6 +97,7 @@ export default {
   'article.saveDraft': '草稿',
   'article.editSuccess': '修改成功',
   'article.addSuccess': '添加成功',
+  'article.publishFailed': '发布失败，请重试',
   'article.imageConvertFailed': '图片转换失败',
 
   // ─── 文章分类 ─────────────────────────────────────
@@ -112,6 +115,8 @@ export default {
   'channel.delete': '删除',
   'channel.cancel': '取消',
   'channel.deleteSuccess': '删除成功',
+  'channel.deleteFailed': '删除分类失败',
+  'channel.loadFailed': '加载分类列表失败',
   'channel.noData': '没有数据',
   'channel.editTitle': '编辑分类',
   'channel.addTitle': '添加分类',
@@ -125,6 +130,7 @@ export default {
   'channel.aliasPattern': '必须是2-15位的字母或数字',
   'channel.editSuccess': '编辑成功',
   'channel.addSuccess': '添加成功',
+  'channel.addFailed': '操作失败，请重试',
   'channel.confirm': '确认',
 
   // ─── 个人中心：基本资料 ───────────────────────────
@@ -140,12 +146,15 @@ export default {
   'profile.emailRequired': '请输入用户邮箱',
   'profile.emailInvalid': '请输入正确的邮箱格式',
   'profile.updateSuccess': '修改成功',
+  'profile.updateFailed': '修改失败，请重试',
 
   // ─── 个人中心：更换头像 ───────────────────────────
   'avatar.title': '更换头像',
   'avatar.selectImage': '选择图片',
   'avatar.upload': '上传头像',
   'avatar.success': '头像更新成功',
+  'avatar.failed': '头像上传失败',
+  'avatar.noFileSelected': '请先选择一张图片',
 
   // ─── 个人中心：重置密码 ───────────────────────────
   'password.title': '修改密码',
@@ -166,6 +175,7 @@ export default {
   'password.notSame': '新密码不能与原密码一样',
   'password.mustMatch': '确认密码必须和新密码一样',
   'password.success': '密码修改成功',
+  'password.failed': '密码修改失败，请重试',
 
   // ─── 主题与语言 ───────────────────────────────────
   'theme.dark': '暗色模式',

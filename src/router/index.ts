@@ -77,15 +77,21 @@ const router = createRouter({
   ] as RouteRecordRaw[]
 })
 
-// 全局前置守卫：无 Token 且目标不是登录页 → 重定向到 /login
+// 全局前置守卫
 router.beforeEach((to) => {
-  // 路由切换时取消上一个页面未完成的 GET 请求，避免无意义网络消耗与状态污染
+  // 路由切换时取消上一个页面未完成的 GET 请求
   cancelAllPending()
 
   const useStore = useUserStore()
 
+  // 未登录访问非登录页 → 跳转登录
   if (!useStore.token && to.path !== '/login') {
     return '/login'
+  }
+
+  // 已登录访问登录页 → 跳转首页（防止浏览器回退到登录页）
+  if (useStore.token && to.path === '/login') {
+    return '/article/channel'
   }
 })
 

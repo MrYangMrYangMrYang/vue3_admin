@@ -3,17 +3,21 @@ import { ref, nextTick, computed } from 'vue'
 import { artEditChannelService, artAddChannelService } from '@/api/article'
 import { ChannelFormData } from '@/types'
 import { useI18n } from '@/composables'
+import { getErrorMessage } from '@/utils/format'
 
 const { t } = useI18n()
 
-const formModel = ref<ChannelFormData>({ cate_name: '', cate_alias: '' })
+const EMPTY_FORM: ChannelFormData = { cate_name: '', cate_alias: '' }
+
+const formModel = ref<ChannelFormData>({ ...EMPTY_FORM })
 const dialogVisible = ref(false)
 const form = ref()
 
-const open = async (obj: ChannelFormData) => {
+const open = async (obj: ChannelFormData | null) => {
+  // 先设置数据再打开 Dialog，避免渲染时 formModel 处于不确定状态
+  formModel.value = obj ? { ...obj } : { ...EMPTY_FORM }
   dialogVisible.value = true
   await nextTick()
-  formModel.value = { ...obj }
   form.value?.clearValidate()
 }
 
@@ -39,16 +43,26 @@ const rules = computed(() => ({
 const emit = defineEmits(['success'])
 
 const onSubmit = async () => {
-  await form.value.validate()
-  if (formModel.value.id) {
-    await artEditChannelService(formModel.value)
-    ElMessage.success(t('channel.editSuccess'))
-  } else {
-    await artAddChannelService(formModel.value)
-    ElMessage.success(t('channel.addSuccess'))
+  // 校验失败时表单自身已展示错误提示，静默返回
+  try {
+    await form.value.validate()
+  } catch {
+    return
   }
-  dialogVisible.value = false
-  emit('success')
+
+  try {
+    if (formModel.value.id) {
+      await artEditChannelService(formModel.value)
+      ElMessage.success(t('channel.editSuccess'))
+    } else {
+      await artAddChannelService(formModel.value)
+      ElMessage.success(t('channel.addSuccess'))
+    }
+    dialogVisible.value = false
+    emit('success')
+  } catch (err: unknown) {
+    ElMessage.error(getErrorMessage(err, t('channel.addFailed')))
+  }
 }
 
 defineExpose({

@@ -1,5 +1,5 @@
 # ==================== 阶段 1：构建 ====================
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 WORKDIR /app
 
 # 启用 pnpm
@@ -14,9 +14,10 @@ COPY . .
 RUN pnpm build
 
 # ==================== 阶段 2：运行 ====================
-FROM nginx:alpine
+# 使用内置 Brotli 模块的 nginx 镜像（支持 .br 静态文件，比 Gzip 体积小 15-20%）
+FROM fholzer/nginx-brotli:latest
 
-# 自定义 nginx 配置（history 模式 fallback + 静态资源缓存 + gzip）
+# 自定义 nginx 配置（安全头 + Gzip/Brotli 压缩 + SPA fallback + 缓存策略）
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # 拷贝构建产物

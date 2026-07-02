@@ -28,7 +28,7 @@ defineProps({
       <div v-for="col in cols" :key="col" class="skeleton-cell">
         <div
           class="skeleton-bar"
-          :style="{ width: 60 + Math.random() * 35 + '%' }"
+          :style="{ width: 55 + ((row * 7 + col * 13) % 35) + '%' }"
         />
       </div>
     </div>

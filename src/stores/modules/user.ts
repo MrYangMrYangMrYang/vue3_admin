@@ -4,9 +4,18 @@
  */
 
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { userGetInfoService } from '../../api/user'
 import type { UserInfo } from '@/types'
+
+/** 未登录/用户尚未加载时的安全回退值 */
+const EMPTY_USER: UserInfo = {
+  id: 0,
+  username: '',
+  nickname: '',
+  email: '',
+  user_pic: null
+}
 
 export const useUserStore = defineStore(
   'big-user',
@@ -14,17 +23,31 @@ export const useUserStore = defineStore(
     /** JWT Token，初始值为空字符串（未登录）；通过 persist 自动持久化；由 axios 拦截器附加到 Authorization 头 */
     const token = ref<string>('')
 
-    /** 当前登录用户信息，初始值为空对象，需调用 getUser() 获取实际数据 */
-    const user = ref<UserInfo>({} as UserInfo)
+    /**
+     * 当前登录用户信息
+     * - null → 未登录或尚未拉取用户资料
+     * - UserInfo → 已登录且有有效用户数据
+     */
+    const user = ref<UserInfo | null>(null)
+
+    /** 安全获取用户显示名：已登录返回昵称/用户名，未登录返回空字符串 */
+    const displayName = computed(() => {
+      if (!user.value) return ''
+      return user.value.nickname || user.value.username
+    })
+
+    /** 安全获取用户头像：已登录返回头像 URL，未登录返回 null */
+    const avatar = computed(() => user.value?.user_pic ?? null)
 
     /** 登录成功后保存 JWT Token */
     const setToken = (newToken: string): void => {
       token.value = newToken
     }
 
-    /** 退出登录时清空 Token（触发持久化插件删除 localStorage） */
+    /** 退出登录时清空 Token 和用户信息（触发持久化插件删除 localStorage） */
     const removeToken = (): void => {
       token.value = ''
+      user.value = null
     }
 
     /**
@@ -36,7 +59,7 @@ export const useUserStore = defineStore(
       user.value = res.data
     }
 
-    /** 直接更新用户状态（通常用于编辑个人信息后的本地同步） */
+    /** 直接设置用户状态（通常用于编辑个人信息后的本地同步） */
     const setUser = (obj: UserInfo): void => {
       user.value = obj
     }
@@ -46,6 +69,8 @@ export const useUserStore = defineStore(
       setToken,
       removeToken,
       user,
+      displayName,
+      avatar,
       getUser,
       setUser
     }

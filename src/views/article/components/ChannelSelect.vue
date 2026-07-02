@@ -17,8 +17,12 @@ const emit = defineEmits(['update:modelValue'])
 const channelList = ref<ArticleChannel[]>([])
 
 const getChannelList = async () => {
-  const res = await artGetChannelsService()
-  channelList.value = res.data
+  try {
+    const res = await artGetChannelsService()
+    channelList.value = res.data
+  } catch {
+    channelList.value = []
+  }
 }
 getChannelList()
 </script>

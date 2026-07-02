@@ -7,6 +7,7 @@ import { useUserStore } from '@/stores'
 import { useRouter } from 'vue-router'
 import AnimatedCharacters from '@/components/AnimatedCharacters.vue'
 import { useI18n } from '@/composables/useI18n'
+import { getErrorMessage } from '@/utils/format'
 
 const { t } = useI18n()
 
@@ -84,8 +85,8 @@ const register = async () => {
     await userRegisterService(formModel.value)
     ElMessage.success(t('login.registerSuccess'))
     isRegister.value = false
-  } catch {
-    // 校验失败或接口报错
+  } catch (err: unknown) {
+    ElMessage.error(getErrorMessage(err, t('login.registerFailed')))
   } finally {
     loading.value = false
   }
@@ -119,9 +120,8 @@ const login = async () => {
     // nextTick 确保 Token 持久化后再跳转
     await nextTick()
     router.push('/article/channel')
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : t('login.failed')
-    ElMessage.error(message)
+  } catch {
+    // 错误提示已在 axios 拦截器中统一处理，此处仅静默捕获
   } finally {
     loading.value = false
   }

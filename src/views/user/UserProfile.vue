@@ -3,21 +3,17 @@ import { ref, computed } from 'vue'
 import { useUserStore } from '@/stores'
 import { userUpdateInfoService } from '@/api/user'
 import { useI18n } from '@/composables'
+import { getErrorMessage } from '@/utils/format'
 
 const { t } = useI18n()
 
-const form = ref()
-
-const {
-  user: { email, id, nickname, username },
-  getUser
-} = useUserStore()
+const userStore = useUserStore()
 
 const user = ref({
-  id,
-  username,
-  nickname,
-  email
+  id: userStore.user?.id ?? 0,
+  username: userStore.user?.username ?? '',
+  nickname: userStore.user?.nickname ?? '',
+  email: userStore.user?.email ?? ''
 })
 
 const rules = computed(() => ({
@@ -39,17 +35,23 @@ const rules = computed(() => ({
   ]
 }))
 
+const form = ref()
 const loading = ref(false)
 
 const submitForm = async () => {
   try {
     await form.value.validate()
+  } catch {
+    return // 校验失败由表单自身展示红色提示，不弹消息
+  }
+
+  try {
     loading.value = true
     await userUpdateInfoService(user.value)
-    await getUser()
+    await userStore.getUser()
     ElMessage.success({ message: t('profile.updateSuccess'), duration: 1500 })
-  } catch {
-    // 校验失败或接口报错处理
+  } catch (err: unknown) {
+    ElMessage.error(getErrorMessage(err, t('profile.updateFailed')))
   } finally {
     loading.value = false
   }

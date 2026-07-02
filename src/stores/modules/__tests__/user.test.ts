@@ -53,11 +53,13 @@ describe('useUserStore 用户状态管理', () => {
       expect(store.token).toBe('new-token')
     })
 
-    it('removeToken 应清空 token 为空字符串', () => {
+    it('removeToken 应清空 token 和用户信息', () => {
       const store = useUserStore()
       store.setToken('jwt-token-abc123')
+      store.setUser(mockUserInfo)
       store.removeToken()
       expect(store.token).toBe('')
+      expect(store.user).toBeNull()
     })
   })
 
@@ -73,7 +75,7 @@ describe('useUserStore 用户状态管理', () => {
       store.setUser(mockUserInfo)
       const newInfo = { ...mockUserInfo, nickname: '新昵称' }
       store.setUser(newInfo)
-      expect(store.user.nickname).toBe('新昵称')
+      expect(store.user?.nickname).toBe('新昵称')
     })
 
     it('getUser 应调用 API 并更新 user 状态', async () => {
@@ -100,8 +102,8 @@ describe('useUserStore 用户状态管理', () => {
 
       const store = useUserStore()
       await expect(store.getUser()).rejects.toThrow('401 Unauthorized')
-      // 验证失败后 user 状态未被更新（仍为初始空对象）
-      expect(store.user).toEqual({} as UserInfo)
+      // 验证失败后 user 仍为 null（初始值）
+      expect(store.user).toBeNull()
     })
   })
 

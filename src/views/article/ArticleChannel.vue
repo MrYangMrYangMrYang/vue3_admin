@@ -5,6 +5,7 @@ import { artGetChannelsService, artDelChannelService } from '@/api/article'
 import ChannelEdit from './components/ChannelEdit.vue'
 import { ArticleChannel as ArticleChannelType } from '@/types'
 import { useI18n } from '@/composables'
+import { getErrorMessage } from '@/utils/format'
 import SkeletonTable from '@/components/SkeletonTable.vue'
 
 const { t } = useI18n()
@@ -13,15 +14,20 @@ const { t } = useI18n()
 defineOptions({ name: 'article-channel' })
 
 const channelList = ref<ArticleChannelType[]>([])
-const loading = ref(true) // 初始为 true，避免空状态闪烁
-const isFirstLoad = ref(true) // 首次加载使用骨架屏，后续使用 v-loading
+const loading = ref(true)
+const isFirstLoad = ref(true)
 
 const getChannelList = async () => {
   loading.value = true
-  const res = await artGetChannelsService()
-  channelList.value = res.data
-  loading.value = false
-  isFirstLoad.value = false
+  try {
+    const res = await artGetChannelsService()
+    channelList.value = res.data
+  } catch (err: unknown) {
+    ElMessage.error(getErrorMessage(err, t('channel.loadFailed')))
+  } finally {
+    loading.value = false
+    isFirstLoad.value = false
+  }
 }
 getChannelList()
 
@@ -32,7 +38,7 @@ const onEditChannel = (row: ArticleChannelType, _index?: number) => {
 }
 
 const onAddChannel = () => {
-  dialog.value.open({} as ArticleChannelType)
+  dialog.value.open(null)
 }
 
 const onDelChannel = async (row: ArticleChannelType, _index?: number) => {
@@ -46,11 +52,17 @@ const onDelChannel = async (row: ArticleChannelType, _index?: number) => {
         cancelButtonText: t('channel.cancel')
       }
     )
+  } catch {
+    // 用户取消删除，静默返回
+    return
+  }
+
+  try {
     await artDelChannelService(row.id)
     ElMessage.success({ message: t('channel.deleteSuccess'), duration: 1500 })
     getChannelList()
-  } catch {
-    // 用户取消删除
+  } catch (err: unknown) {
+    ElMessage.error(getErrorMessage(err, t('channel.deleteFailed')))
   }
 }
 

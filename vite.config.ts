@@ -92,6 +92,24 @@ export default defineConfig(({ mode }) => {
     ].filter(Boolean),
 
     /**
+     * 开发服务器配置
+     * @description API 代理：将 /api 请求转发到后端，规避本地开发的 CORS 问题
+     */
+    server: {
+      proxy: {
+        // 当 VITE_API_BASE_URL 为空时生效：/api /my 转发到本地 Mock
+        '/api': {
+          target: 'http://localhost:3000',
+          changeOrigin: true
+        },
+        '/my': {
+          target: 'http://localhost:3000',
+          changeOrigin: true
+        }
+      }
+    },
+
+    /**
      * 基础路径配置
      * @description 优先使用环境变量 VITE_BASE_PATH，默认根路径 '/'
      *

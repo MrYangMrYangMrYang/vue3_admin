@@ -4,32 +4,38 @@ import { Plus, Upload } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores'
 import { userUpdateAvatarService } from '@/api/user'
 import { useI18n } from '@/composables'
+import { getErrorMessage } from '@/utils/format'
 
 const { t } = useI18n()
 
 const userStore = useUserStore()
-const imgUrl = ref(userStore.user.user_pic)
+const imgUrl = ref(userStore.user?.user_pic)
 const upload = ref()
+const fileSelected = ref(false)
 
 const onSelectFile = (uploadFile: { raw: Blob }) => {
   const reader = new FileReader()
   reader.readAsDataURL(uploadFile.raw)
   reader.onload = () => {
     imgUrl.value = reader.result as string
+    fileSelected.value = true
   }
 }
 
 const loading = ref(false)
 
 const onUpdateAvatar = async () => {
+  if (!fileSelected.value) {
+    ElMessage.warning(t('avatar.noFileSelected'))
+    return
+  }
   try {
     loading.value = true
-    // 后端接收 base64 字符串
     await userUpdateAvatarService(imgUrl.value ?? '')
     await userStore.getUser()
     ElMessage.success({ message: t('avatar.success'), duration: 1500 })
-  } catch {
-    // 错误处理
+  } catch (err: unknown) {
+    ElMessage.error(getErrorMessage(err, t('avatar.failed')))
   } finally {
     loading.value = false
   }
