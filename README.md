@@ -21,6 +21,7 @@
   <img src="https://img.shields.io/badge/Element--Plus-2.11.5-409eff?logo=element-plus" alt="Element Plus">
   <img src="https://img.shields.io/badge/Pinia-3.0.3-yellow?logo=pinia" alt="Pinia">
   <img src="https://img.shields.io/badge/GSAP-3.15.0-88ce02?logo=greensock" alt="GSAP">
+  <img src="https://img.shields.io/badge/PWA-✓-5a0fc8?logo=pwa" alt="PWA">
   <img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License">
 </p>
 
@@ -94,6 +95,21 @@
 - ✅ **401 自动跳转**：Token 过期自动返回登录页，同时清空 store 避免残余数据
 - ✅ **表单校验完善**：注册/登录/密码修改都有完整校验
 
+### 🔐 RBAC 权限控制系统
+- ✅ **角色管理**：预设 admin / editor / viewer 三角色，支持自定义角色与权限码分配
+- ✅ **按钮级权限**：`v-permission` 指令控制 UI 元素显隐（`article:delete`、`channel:manage` 等）
+- ✅ **路由级权限**：`meta.permission` + 路由守卫，无权限自动拦截并提示
+- ✅ **动态菜单**：侧边栏根据用户权限自动过滤可见菜单项
+- ✅ **权限码命名空间**：`resource:action` 格式，支持 `*` 超级管理员通配符
+- ✅ **Mock 集成**：后端返回角色 + 权限平铺数组，前端零额外请求
+
+### 📱 PWA 渐进式 Web 应用
+- ✅ **离线缓存**：Service Worker 预缓存 48 个静态资源（2.3MB），重复访问秒开
+- ✅ **可安装**：支持添加到桌面/任务栏，`standalone` 模式无浏览器 UI
+- ✅ **自动更新**：新版本发布后自动提示刷新
+- ✅ **网络优先策略**：API 请求始终走网络，业务数据永不缓存过期数据
+- ✅ **Lighthouse PWA 评分 100**
+
 ### ⚡ 构建性能与工程化
 - ✅ **Vite 分包优化**：manualChunks 拆分 vendor-vue/element/gsap/quill/axios 5 大包，入口文件 212KB→12KB（-94%）
 - ✅ **Gzip + Brotli 双压缩**：vite-plugin-compression 预压缩，大幅减少传输体积
@@ -125,9 +141,9 @@
 ### 🔐 用户认证系统
 - ✅ 用户注册与登录（多规则表单校验）
 - ✅ JWT Token 认证机制（Bearer Token）
-- ✅ 路由守卫与权限控制（全局前置守卫）
+- ✅ 路由守卫与 RBAC 权限控制（Token + 权限码双重校验）
 - ✅ 登录状态持久化（Pinia + pinia-plugin-persistedstate）
-- ✅ 记住我功能（localStorage）
+- ✅ 多角色测试账号（admin / editor / viewer）
 - ✅ 密码显示/隐藏切换
 - ✅ 登录成功自动跳转到主页面
 
@@ -152,6 +168,14 @@
 - ✅ 个人资料编辑（昵称、邮箱修改）
 - ✅ 头像上传与更新（Base64 格式 + FileReader）
 - ✅ 密码修改（旧密码验证 + 一致性检查）
+
+### 🛡️ 权限管理（RBAC）
+- ✅ 角色列表管理（预设 admin / editor / viewer + 自定义角色 CRUD）
+- ✅ 权限码可视化分配（checkbox 按分组选择）
+- ✅ `v-permission` 指令控制按钮级权限（`article:create`、`article:delete`、`channel:manage` 等）
+- ✅ 路由权限守卫（`meta.permission`，无权限时拦截并提示）
+- ✅ 动态菜单过滤（侧边栏仅展示用户有权访问的菜单项）
+- ✅ 超级管理员通配符 `*`
 
 ### 🎨 UI/UX 体验
 - ✅ 响应式布局设计（Grid + Flexbox）
@@ -206,6 +230,7 @@
 | **Husky** | ^8.0.0 | Git Hooks 管理 |
 | **Vitest** | ^4.1.9 | 单元测试框架（jsdom + v8 coverage） |
 | **Playwright** | ^1.54 | E2E 测试框架（Chromium 浏览器自动化） |
+| **vite-plugin-pwa** | ^1.3.0 | PWA 离线缓存 + 可安装 + 自动更新 |
 
 ---
 
@@ -228,6 +253,7 @@ vue3-big-event-admin/
 ├── src/                            # 源代码目录
 │   ├── api/                       # API 接口层（Axios 封装）
 │   │   ├── article.ts             # 文章相关接口（9个 API）
+│   │   ├── role.ts                # 角色权限接口（5个 API）
 │   │   └── user.ts                # 用户相关接口（6个 API）
 │   │
 │   ├── assets/                    # 静态图片资源
@@ -241,7 +267,7 @@ vue3-big-event-admin/
 │   │   ├── PageContainer.vue      # 页面容器组件（标题+插槽）
 │   │   └── SkeletonTable.vue      # 骨架屏组件（shimmer 动画表格占位）
 │   │
-│   ├── composables/               # 可组合式函数（useRequest/useTable/useTheme/useI18n）
+│   ├── composables/               # 可组合式函数（useRequest/useTable/useTheme/useI18n/usePermission）
 │   │   ├── __tests__/             # composables 单元测试
 │   │   │   ├── useRequest.test.ts
 │   │   │   └── useTable.test.ts
@@ -249,7 +275,12 @@ vue3-big-event-admin/
 │   │   ├── useTable.ts            # 列表页通用 Hook（分页+查询+CRUD）
 │   │   ├── useTheme.ts            # 主题切换 Hook（暗色/亮色 + 系统偏好）
 │   │   ├── useI18n.ts             # 国际化 Hook（零依赖自实现 t() + 参数插值）
+│   │   ├── usePermission.ts       # 权限检查 Hook（hasPermission/hasRole）
 │   │   └── index.ts               # 统一导出
+│   │
+│   ├── directives/                # 自定义指令
+│   │   ├── permission.ts          # v-permission 权限指令
+│   │   └── index.ts               # 统一注册入口
 │   │
 │   ├── locales/                   # 国际化语言包
 │   │   ├── zh.ts                  # 中文语言包
@@ -263,7 +294,8 @@ vue3-big-event-admin/
 │   │   └── modules/               # 模块化 Store
 │   │       ├── __tests__/         # Store 单元测试
 │   │       │   └── user.test.ts
-│   │       └── user.ts            # 用户状态（Token + 用户信息）
+│   │       ├── user.ts            # 用户状态（Token + 用户信息 + 权限同步）
+│   │       └── permission.ts      # 权限状态（hasPermission/hasRole）
 │   │
 │   ├── styles/                    # 全局样式
 │   │   └── main.scss              # 全局 SCSS 变量与基础样式
@@ -298,6 +330,11 @@ vue3-big-event-admin/
 │   │   │   ├── UserPassword.vue       # 密码修改页面
 │   │   │   └── UserProfile.vue        # 个人资料编辑
 │   │   │
+│   │   ├── role/                  # 角色管理（RBAC）
+│   │   │   ├── components/
+│   │   │   │   └── RoleEdit.vue       # 角色编辑弹窗（权限码分配）
+│   │   │   └── RoleManage.vue         # 角色列表页面
+│   │   │
 │   │   └── NotFound.vue           # 404 页面（catchAll 兜底路由）
 │   │
 │   ├── App.vue                    # 根组件
@@ -312,16 +349,19 @@ vue3-big-event-admin/
 │       └── ci.yml                 # GitHub Actions CI 流水线（lint + test + build）
 ├── .env.development               # 开发环境变量（VITE_API_BASE_URL）
 ├── .env.production                # 生产环境变量（VITE_API_BASE_URL）
+├── mock/                          # 本地 Mock API Server
+│   └── server.mjs                 # Express 模拟后端（含 RBAC 角色权限数据）
 ├── .dockerignore                  # Docker 构建忽略列表
 ├── Dockerfile                     # 多阶段构建（node 构建 + nginx 运行）
 ├── nginx.conf                     # Nginx 配置（SPA fallback + gzip）
 ├── eslint.config.js               # ESLint 9 Flat Config（Vue + TS 规则）
-├── index.html                     # HTML 入口模板
+├── index.html                     # HTML 入口模板（含 PWA meta 标签）
 ├── package.json                   # 项目依赖与脚本命令
 ├── pnpm-lock.yaml                 # pnpm 锁定文件（确保依赖一致性）
+├── playwright.config.ts           # Playwright E2E 配置（3 浏览器 + webServer）
 ├── tsconfig.json                  # TypeScript 项目配置
 ├── tsconfig.node.json             # Node.js 环境 TS 配置
-├── vite.config.ts                 # Vite 构建配置（含自动导入插件 + 分包压缩）
+├── vite.config.ts                 # Vite 构建配置（含 PWA + 分包 + 压缩）
 └── vitest.config.ts               # Vitest 单元测试配置（jsdom + v8 coverage）
 ```
 
@@ -367,11 +407,15 @@ pnpm dev
 # 启动后访问: http://localhost:5173
 ```
 
-**默认测试账号：**
-- 用户名：`admin`
-- 密码：`123456`
+**RBAC 测试账号（三种角色）：**
 
-> 📝 开发环境使用本地 Mock Server（`pnpm mock`），无需外部 API。
+| 账号 | 密码 | 角色 | 权限范围 |
+|---|---|---|---|
+| `admin` | `123456` | 管理员 `*` | 全部页面 + 角色管理 |
+| `editor` | `123456` | 编辑者 | 文章管理 + 分类查看 + 个人中心 |
+| `viewer` | `123456` | 访客 | 文章查看 + 分类查看 + 个人中心 |
+
+> 📝 开发环境使用本地 Mock Server（`pnpm mock`），无需外部 API。启动 Mock Server + Dev 一键命令：`pnpm dev:mock`
 
 ### 生产环境构建
 
@@ -670,14 +714,14 @@ docs(readme): 更新部署说明文档
 - [x] 文章批量删除（Promise.allSettled 并发 + 成功/失败统计）
 - [x] Docker 容器化部署（多阶段构建 + nginx）
 - [x] GitHub Actions CI 流水线（lint + test + build）
+- [x] RBAC 权限控制（角色管理 + 按钮级权限 + 动态菜单 + v-permission 指令）
+- [x] PWA 离线支持（Service Worker 预缓存 + Web App Manifest + 可安装）
 
 ### 🚧 进行中
 - 暂无
 
 ### 📌 计划中
-- [ ] RBAC 权限控制（角色管理 + 按钮级权限）
 - [ ] Excel/PDF 数据导出
-- [ ] PWA 离线支持（Service Worker + Manifest）
 - [ ] 操作日志记录
 - [ ] WebSocket 实时通知
 
