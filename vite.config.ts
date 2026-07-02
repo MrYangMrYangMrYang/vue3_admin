@@ -20,6 +20,9 @@ import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 import viteCompression from 'vite-plugin-compression'
 import { visualizer } from 'rollup-plugin-visualizer'
 
+// PWA 插件
+import { VitePWA } from 'vite-plugin-pwa'
+
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
   /**
@@ -88,7 +91,56 @@ export default defineConfig(({ mode }) => {
           gzipSize: true,
           brotliSize: true,
           filename: 'dist/stats.html'
-        })
+        }),
+
+      // PWA：离线缓存 + 可安装 + 自动更新
+      // 策略：预缓存所有静态资源（JS/CSS/图片），API 请求始终走网络
+      // 开发环境不启用 Service Worker，避免 HMR 被缓存干扰
+      VitePWA({
+        registerType: 'autoUpdate',
+        // 包含在 Service Worker 预缓存中的文件模式
+        includeAssets: ['favicon.svg'],
+        workbox: {
+          globPatterns: ['**/*.{js,css,html,ico,png,svg,jpg,woff2}'],
+          // API 请求始终走网络，不缓存业务数据
+          runtimeCaching: [
+            {
+              urlPattern: /^https?:\/\/.*\/api\/.*/i,
+              handler: 'NetworkOnly',
+              options: {
+                backgroundSync: {
+                  name: 'api-queue',
+                  options: { maxRetentionTime: 0 }
+                }
+              }
+            },
+            {
+              urlPattern: /^https?:\/\/.*\/my\/.*/i,
+              handler: 'NetworkOnly'
+            }
+          ]
+        },
+        manifest: {
+          name: '大事件管理系统',
+          short_name: 'Big Event',
+          description: '基于 Vue 3 + TypeScript 构建的现代化后台管理系统',
+          theme_color: '#232323',
+          background_color: '#ffffff',
+          display: 'standalone',
+          orientation: 'any',
+          start_url: '/',
+          scope: '/',
+          lang: 'zh-CN',
+          icons: [
+            {
+              src: '/favicon.svg',
+              sizes: 'any',
+              type: 'image/svg+xml',
+              purpose: 'any maskable'
+            }
+          ]
+        }
+      })
     ].filter(Boolean),
 
     /**
