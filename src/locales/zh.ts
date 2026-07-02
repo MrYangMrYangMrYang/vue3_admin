@@ -50,6 +50,7 @@ export default {
   'menu.password': '重置密码',
   'menu.logout': '退出登录',
   'menu.manager': '管理人员',
+  'menu.roleManage': '角色管理',
 
   // ─── 文章管理 ─────────────────────────────────────
   'article.title': '文章管理',
@@ -196,5 +197,26 @@ export default {
   'common.notFound': '页面走丢了',
   'common.notFoundDesc': '您访问的页面不存在或已被移除',
   'common.backHome': '返回首页',
-  'common.footer': '大事件 ©2025 Created by MrYang'
+  'common.footer': '大事件 ©2025 Created by MrYang',
+
+  // ─── 权限与角色管理 ───────────────────────────────
+  'permission.denied': '权限不足',
+  'permission.noAccess': '您没有权限访问此页面',
+  'role.title': '角色管理',
+  'role.addRole': '添加角色',
+  'role.editRole': '编辑角色',
+  'role.deleteRole': '删除角色',
+  'role.name': '角色标识',
+  'role.label': '角色名称',
+  'role.description': '角色描述',
+  'role.permissions': '权限分配',
+  'role.namePlaceholder': '请输入角色标识（如 editor）',
+  'role.labelPlaceholder': '请输入角色显示名',
+  'role.descPlaceholder': '请输入角色描述',
+  'role.nameRequired': '请输入角色标识',
+  'role.labelRequired': '请输入角色显示名',
+  'role.deleteConfirm': '确定要删除该角色吗？相关用户将失去对应权限。',
+  'role.createSuccess': '角色创建成功',
+  'role.updateSuccess': '角色更新成功',
+  'role.deleteSuccess': '角色删除成功'
 }

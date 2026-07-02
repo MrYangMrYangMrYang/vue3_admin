@@ -159,7 +159,11 @@ const onSuccess = (type: string) => {
 <template>
   <page-container :title="t('article.title')">
     <template #extra>
-      <el-button type="primary" @click="onAddArticle">
+      <el-button
+        type="primary"
+        v-permission="'article:create'"
+        @click="onAddArticle"
+      >
         {{ t('article.addArticle') }}
       </el-button>
     </template>
@@ -199,7 +203,12 @@ const onSuccess = (type: string) => {
       <span class="batch-count">
         {{ t('article.batchSelected', { count: selectedRows.length }) }}
       </span>
-      <el-button type="danger" :icon="Delete" @click="onBatchDelete">
+      <el-button
+        type="danger"
+        :icon="Delete"
+        v-permission="'article:delete'"
+        @click="onBatchDelete"
+      >
         {{ t('article.batchDelete') }}
       </el-button>
     </div>
@@ -246,7 +255,11 @@ const onSuccess = (type: string) => {
           fixed="right"
         >
           <template #default="{ row }">
-            <el-tooltip :content="t('article.editArticle')" placement="top">
+            <el-tooltip
+              v-permission="'article:create'"
+              :content="t('article.editArticle')"
+              placement="top"
+            >
               <el-button
                 circle
                 plain
@@ -256,7 +269,11 @@ const onSuccess = (type: string) => {
                 @click="onEditArticle(row)"
               ></el-button>
             </el-tooltip>
-            <el-tooltip :content="t('article.deleteArticle')" placement="top">
+            <el-tooltip
+              v-permission="'article:delete'"
+              :content="t('article.deleteArticle')"
+              placement="top"
+            >
               <el-button
                 circle
                 plain

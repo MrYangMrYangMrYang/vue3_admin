@@ -16,12 +16,14 @@ import { useUserStore } from '../user'
 import { userGetInfoService } from '@/api/user'
 
 // 模拟用户数据
-const mockUserInfo = {
+const mockUserInfo: UserInfo = {
   id: 1,
   username: 'admin',
   nickname: '管理员',
   email: 'admin@test.com',
-  user_pic: 'https://example.com/avatar.png'
+  user_pic: 'https://example.com/avatar.png',
+  role: 'admin',
+  permissions: ['*']
 }
 
 describe('useUserStore 用户状态管理', () => {

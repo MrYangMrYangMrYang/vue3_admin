@@ -6,6 +6,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { userGetInfoService } from '../../api/user'
+import { usePermissionStore } from './permission'
 import type { UserInfo } from '@/types'
 
 /** 未登录/用户尚未加载时的安全回退值 */
@@ -14,7 +15,9 @@ const EMPTY_USER: UserInfo = {
   username: '',
   nickname: '',
   email: '',
-  user_pic: null
+  user_pic: null,
+  role: '',
+  permissions: []
 }
 
 export const useUserStore = defineStore(
@@ -44,19 +47,24 @@ export const useUserStore = defineStore(
       token.value = newToken
     }
 
-    /** 退出登录时清空 Token 和用户信息（触发持久化插件删除 localStorage） */
+    /** 退出登录时清空 Token、用户信息和权限（触发持久化插件删除 localStorage） */
     const removeToken = (): void => {
       token.value = ''
       user.value = null
+      usePermissionStore().clearPermissions()
     }
 
     /**
-     * 从后端 API 获取最新用户资料并更新本地状态
+     * 从后端 API 获取最新用户资料并更新本地状态与权限
      * @throws 未登录或 Token 过期时抛出 401 错误
      */
     const getUser = async (): Promise<void> => {
       const res = await userGetInfoService()
       user.value = res.data
+      // 将用户权限同步到 PermissionStore
+      if (res.data.permissions) {
+        usePermissionStore().setPermissions(res.data.permissions)
+      }
     }
 
     /** 直接设置用户状态（通常用于编辑个人信息后的本地同步） */

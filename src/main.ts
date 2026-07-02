@@ -7,6 +7,7 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
 import pinia from './stores'
+import { registerDirectives } from './directives'
 
 import '@/styles/main.scss'
 
@@ -26,5 +27,6 @@ app.config.errorHandler = (err, _instance, info) => {
 
 app.use(pinia)
 app.use(router)
+registerDirectives(app)
 
 app.mount('#app')

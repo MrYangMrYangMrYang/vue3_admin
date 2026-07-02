@@ -12,6 +12,39 @@ export interface ApiResponse<T = unknown> {
   data: T
 }
 
+// ==================== 权限与角色类型 ====================
+
+/** 权限码（resource:action 命名空间格式，如 article:create） */
+export type PermissionCode = string
+
+/** 角色定义 */
+export interface Role {
+  /** 角色 ID */
+  id: number
+  /** 角色标识名（如 admin、editor） */
+  name: string
+  /** 角色显示名（如 管理员、编辑者） */
+  label: string
+  /** 角色拥有的权限码列表 */
+  permissions: PermissionCode[]
+  /** 角色描述 */
+  description?: string
+}
+
+/** 角色编辑表单数据 */
+export interface RoleFormData {
+  /** 角色 ID（编辑时必需，新增时忽略） */
+  id?: number
+  /** 角色标识名 */
+  name: string
+  /** 角色显示名 */
+  label: string
+  /** 角色描述 */
+  description?: string
+  /** 分配的权限码列表 */
+  permissions: PermissionCode[]
+}
+
 // ==================== 用户相关类型 ====================
 
 /** 用户基本信息（username 不可修改，nickname/email 可修改） */
@@ -26,6 +59,10 @@ export interface UserInfo {
   email: string
   /** 头像图片 URL 或 null */
   user_pic: string | null
+  /** 角色标识名 */
+  role: string
+  /** 用户拥有的权限码列表（服务端根据角色展开后的平铺数组） */
+  permissions: PermissionCode[]
 }
 
 /** 用户注册表单数据 */

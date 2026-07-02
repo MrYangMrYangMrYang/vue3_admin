@@ -12,14 +12,15 @@ import {
   Fold,
   Sunny,
   Moon,
-  Menu
+  Menu,
+  Setting
 } from '@element-plus/icons-vue'
 import avatar from '@/assets/default-avatar.png'
 import { useUserStore } from '@/stores'
-import { onMounted, onUnmounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useTheme } from '@/composables/useTheme'
-import { useI18n } from '@/composables/useI18n'
+import { useI18n, usePermission } from '@/composables'
 import type { Locale } from '@/composables/useI18n'
 import AppBreadcrumb from '@/components/AppBreadcrumb.vue'
 
@@ -56,6 +57,77 @@ onMounted(async () => {
 })
 
 const router = useRouter()
+const { hasPermission } = usePermission()
+
+/** 菜单配置项 */
+interface MenuItem {
+  index: string
+  icon: typeof Management
+  label: string
+  permission?: string
+  children?: MenuItem[]
+}
+
+/** 动态菜单：根据用户权限过滤 */
+const menuItems = computed<MenuItem[]>(() => {
+  const { t } = useI18n()
+  const raw: MenuItem[] = [
+    {
+      index: '/article/channel',
+      icon: Management,
+      label: t('menu.articleChannel'),
+      permission: 'channel:read'
+    },
+    {
+      index: '/article/manage',
+      icon: Promotion,
+      label: t('menu.articleManage'),
+      permission: 'article:read'
+    },
+    {
+      index: '/user',
+      icon: UserFilled,
+      label: t('menu.userCenter'),
+      children: [
+        {
+          index: '/user/profile',
+          icon: User,
+          label: t('menu.profile'),
+          permission: 'user:profile'
+        },
+        {
+          index: '/user/avatar',
+          icon: Crop,
+          label: t('menu.avatar'),
+          permission: 'user:profile'
+        },
+        {
+          index: '/user/password',
+          icon: EditPen,
+          label: t('menu.password'),
+          permission: 'user:profile'
+        }
+      ]
+    },
+    {
+      index: '/role/manage',
+      icon: Setting,
+      label: t('menu.roleManage'),
+      permission: 'role:manage'
+    }
+  ]
+
+  return raw.filter((item) => {
+    if (item.children) {
+      // 子菜单：过滤有权限的子项，若无任何子项则隐藏整个菜单
+      item.children = item.children.filter(
+        (child) => !child.permission || hasPermission(child.permission)
+      )
+      return item.children.length > 0
+    }
+    return !item.permission || hasPermission(item.permission)
+  })
+})
 
 const handleCommand = async (key: string) => {
   if (key === 'logout') {
@@ -127,34 +199,32 @@ const onMenuSelect = () => {
         aria-label="主导航"
         @select="onMenuSelect"
       >
-        <el-menu-item index="/article/channel">
-          <el-icon><Management /></el-icon>
-          <span>{{ t('menu.articleChannel') }}</span>
-        </el-menu-item>
-        <el-menu-item index="/article/manage">
-          <el-icon><Promotion /></el-icon>
-          <span>{{ t('menu.articleManage') }}</span>
-        </el-menu-item>
-
-        <el-sub-menu index="/user">
-          <template #title>
-            <el-icon><UserFilled /></el-icon>
-            <span>{{ t('menu.userCenter') }}</span>
-          </template>
-
-          <el-menu-item index="/user/profile">
-            <el-icon><User /></el-icon>
-            <span>{{ t('menu.profile') }}</span>
+        <template v-for="item in menuItems" :key="item.index">
+          <!-- 有子菜单项 -->
+          <el-sub-menu
+            v-if="item.children"
+            :index="item.index"
+            :key="'sub-' + item.index"
+          >
+            <template #title>
+              <el-icon><component :is="item.icon" /></el-icon>
+              <span>{{ item.label }}</span>
+            </template>
+            <el-menu-item
+              v-for="child in item.children"
+              :key="child.index"
+              :index="child.index"
+            >
+              <el-icon><component :is="child.icon" /></el-icon>
+              <span>{{ child.label }}</span>
+            </el-menu-item>
+          </el-sub-menu>
+          <!-- 单一菜单项 -->
+          <el-menu-item v-else :index="item.index" :key="'item-' + item.index">
+            <el-icon><component :is="item.icon" /></el-icon>
+            <span>{{ item.label }}</span>
           </el-menu-item>
-          <el-menu-item index="/user/avatar">
-            <el-icon><Crop /></el-icon>
-            <span>{{ t('menu.avatar') }}</span>
-          </el-menu-item>
-          <el-menu-item index="/user/password">
-            <el-icon><EditPen /></el-icon>
-            <span>{{ t('menu.password') }}</span>
-          </el-menu-item>
-        </el-sub-menu>
+        </template>
       </el-menu>
     </el-aside>
 
@@ -244,7 +314,9 @@ const onMenuSelect = () => {
         <AppBreadcrumb class="breadcrumb-bar" />
         <!-- keep-alive 缓存列表页，保留分页与搜索状态 -->
         <router-view v-slot="{ Component }">
-          <keep-alive :include="['article-manage', 'article-channel']">
+          <keep-alive
+            :include="['article-manage', 'article-channel', 'role-manage']"
+          >
             <component :is="Component" />
           </keep-alive>
         </router-view>

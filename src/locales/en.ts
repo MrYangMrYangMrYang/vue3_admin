@@ -51,6 +51,7 @@ export default {
   'menu.password': 'Password',
   'menu.logout': 'Logout',
   'menu.manager': 'Manager',
+  'menu.roleManage': 'Role Management',
 
   // ─── Article Management ──────────────────────────
   'article.title': 'Article Management',
@@ -199,5 +200,27 @@ export default {
   'common.notFoundDesc':
     'The page you visited does not exist or has been removed',
   'common.backHome': 'Back to Home',
-  'common.footer': 'Big Event ©2025 Created by MrYang'
+  'common.footer': 'Big Event ©2025 Created by MrYang',
+
+  // ─── Permission & Role Management ──────────────────
+  'permission.denied': 'Permission Denied',
+  'permission.noAccess': 'You do not have permission to access this page',
+  'role.title': 'Role Management',
+  'role.addRole': 'Add Role',
+  'role.editRole': 'Edit Role',
+  'role.deleteRole': 'Delete Role',
+  'role.name': 'Role Key',
+  'role.label': 'Role Name',
+  'role.description': 'Description',
+  'role.permissions': 'Permissions',
+  'role.namePlaceholder': 'Enter role key (e.g. editor)',
+  'role.labelPlaceholder': 'Enter role name',
+  'role.descPlaceholder': 'Enter description',
+  'role.nameRequired': 'Role key is required',
+  'role.labelRequired': 'Role name is required',
+  'role.deleteConfirm':
+    'Are you sure to delete this role? Related users will lose permissions.',
+  'role.createSuccess': 'Role created',
+  'role.updateSuccess': 'Role updated',
+  'role.deleteSuccess': 'Role deleted'
 }

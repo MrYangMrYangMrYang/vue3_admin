@@ -74,7 +74,11 @@ const onSuccess = () => {
 <template>
   <page-container :title="t('channel.title')">
     <template #extra>
-      <el-button @click="onAddChannel" type="primary">
+      <el-button
+        v-permission="'channel:manage'"
+        @click="onAddChannel"
+        type="primary"
+      >
         {{ t('channel.addChannel') }}
       </el-button>
     </template>
@@ -113,7 +117,11 @@ const onSuccess = () => {
         fixed="right"
       >
         <template #default="{ row, $index }">
-          <el-tooltip :content="t('channel.editChannel')" placement="top">
+          <el-tooltip
+            v-permission="'channel:manage'"
+            :content="t('channel.editChannel')"
+            placement="top"
+          >
             <el-button
               :icon="Edit"
               circle
@@ -123,7 +131,11 @@ const onSuccess = () => {
               @click="onEditChannel(row, $index)"
             ></el-button>
           </el-tooltip>
-          <el-tooltip :content="t('channel.deleteChannel')" placement="top">
+          <el-tooltip
+            v-permission="'channel:manage'"
+            :content="t('channel.deleteChannel')"
+            placement="top"
+          >
             <el-button
               :icon="Delete"
               circle

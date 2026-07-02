@@ -87,6 +87,102 @@ const user = {
   user_pic: null
 }
 
+// ─── RBAC 角色与权限 ────────────────────────────────────
+
+/** 可用权限码全量列表 */
+const ALL_PERMISSIONS = [
+  { code: 'article:read', label: '查看文章', group: 'article' },
+  { code: 'article:create', label: '发布/编辑文章', group: 'article' },
+  { code: 'article:delete', label: '删除文章', group: 'article' },
+  { code: 'channel:read', label: '查看分类', group: 'channel' },
+  { code: 'channel:manage', label: '管理分类', group: 'channel' },
+  { code: 'user:profile', label: '个人中心', group: 'user' },
+  { code: 'role:manage', label: '角色管理', group: 'role' }
+]
+
+/** 预设角色 */
+const ROLES = [
+  {
+    id: 1,
+    name: 'admin',
+    label: '管理员',
+    description: '超级管理员，拥有所有权限',
+    permissions: ['*']
+  },
+  {
+    id: 2,
+    name: 'editor',
+    label: '编辑者',
+    description: '管理文章内容，查看分类',
+    permissions: [
+      'article:read',
+      'article:create',
+      'article:delete',
+      'channel:read'
+    ]
+  },
+  {
+    id: 3,
+    name: 'viewer',
+    label: '访客',
+    description: '只读访问',
+    permissions: ['article:read', 'channel:read', 'user:profile']
+  }
+]
+let roleSeq = 4
+
+/** username → 角色名列表 */
+const userRoles = new Map([
+  ['admin', ['admin']],
+  ['editor', ['editor']],
+  ['viewer', ['viewer']]
+])
+
+/** 展开角色权限为平铺数组（支持 * 通配符） */
+function expandPermissions(roleNames) {
+  const set = new Set()
+  for (const name of roleNames) {
+    const role = ROLES.find((r) => r.name === name)
+    if (!role) continue
+    for (const perm of role.permissions) {
+      if (perm === '*') {
+        ALL_PERMISSIONS.forEach((p) => set.add(p.code))
+      } else if (perm.endsWith(':*')) {
+        const prefix = perm.slice(0, -1)
+        ALL_PERMISSIONS.forEach((p) => {
+          if (p.code.startsWith(prefix)) set.add(p.code)
+        })
+      } else {
+        set.add(perm)
+      }
+    }
+  }
+  return [...set]
+}
+
+/** 从 token 获取用户权限 */
+function getUserPermissions(req) {
+  const username = getCurrentUser(req)
+  if (!username) return []
+  return expandPermissions(userRoles.get(username) || [])
+}
+
+/** 权限校验中间件工厂 */
+function requirePermission(permission) {
+  return (req, res, next) => {
+    const perms = getUserPermissions(req)
+    if (!perms.length) {
+      return res.status(401).json({ code: 1, message: '未授权', data: null })
+    }
+    if (!perms.includes(permission)) {
+      return res
+        .status(403)
+        .json({ code: 1, message: '无权限执行此操作', data: null })
+    }
+    next()
+  }
+}
+
 const categories = [
   { id: 1, cate_name: '技术', cate_alias: 'tech' },
   { id: 2, cate_name: '生活', cate_alias: 'life' },
@@ -136,7 +232,11 @@ const ok = (data = null, message = 'success') => ({ code: 0, message, data })
 // ─── 用户模块 ─────────────────────────────────────────
 
 /** 已注册用户：username → password */
-const users = new Map([['admin', '123456']])
+const users = new Map([
+  ['admin', '123456'],
+  ['editor', '123456'],
+  ['viewer', '123456']
+])
 
 /** POST /api/reg — 注册 */
 app.post('/api/reg', (req, res) => {
@@ -166,13 +266,15 @@ app.post('/api/login', (req, res) => {
   res.json(ok({ token }, '登录成功'))
 })
 
-/** GET /my/userinfo — 获取用户信息 */
+/** GET /my/userinfo — 获取用户信息（含角色与权限） */
 app.get('/my/userinfo', (req, res) => {
   const username = getCurrentUser(req)
   if (!username) {
     return res.status(401).json({ code: 1, message: '未授权', data: null })
   }
-  res.json(ok({ ...user, username }))
+  const roles = userRoles.get(username) || ['viewer']
+  const permissions = expandPermissions(roles)
+  res.json(ok({ ...user, username, role: roles[0], permissions }))
 })
 
 /** PUT /my/userinfo — 更新用户信息 */
@@ -324,6 +426,61 @@ app.delete('/my/article/info', (req, res) => {
   const id = parseInt(req.query.id)
   const idx = articles.findIndex((a) => a.id === id)
   if (idx !== -1) articles.splice(idx, 1)
+  res.json(ok(null, '删除成功'))
+})
+
+// ─── 角色管理模块（Admin RBAC）───────────────────────────
+
+/** GET /admin/roles — 获取角色列表 */
+app.get('/admin/roles', (_req, res) => {
+  res.json(ok(ROLES))
+})
+
+/** GET /admin/permissions — 获取所有可用权限码 */
+app.get('/admin/permissions', (_req, res) => {
+  res.json(ok(ALL_PERMISSIONS))
+})
+
+/** POST /admin/roles — 创建角色 */
+app.post('/admin/roles', (req, res) => {
+  const { name, label, description, permissions } = req.body
+  if (!name || !label) {
+    return res.json({ code: 1, message: '角色名和显示名不能为空', data: null })
+  }
+  const newRole = {
+    id: roleSeq++,
+    name,
+    label,
+    description: description || '',
+    permissions: permissions || []
+  }
+  ROLES.push(newRole)
+  res.json(ok(newRole, '角色创建成功'))
+})
+
+/** PUT /admin/roles/:id — 更新角色 */
+app.put('/admin/roles/:id', (req, res) => {
+  const id = parseInt(req.params.id)
+  const role = ROLES.find((r) => r.id === id)
+  if (!role) {
+    return res.json({ code: 1, message: '角色不存在', data: null })
+  }
+  const { name, label, description, permissions } = req.body
+  if (name) role.name = name
+  if (label) role.label = label
+  if (description !== undefined) role.description = description
+  if (permissions) role.permissions = permissions
+  res.json(ok(null, '角色更新成功'))
+})
+
+/** DELETE /admin/roles/:id — 删除角色 */
+app.delete('/admin/roles/:id', (req, res) => {
+  const id = parseInt(req.params.id)
+  const idx = ROLES.findIndex((r) => r.id === id)
+  if (idx === -1) {
+    return res.json({ code: 1, message: '角色不存在', data: null })
+  }
+  ROLES.splice(idx, 1)
   res.json(ok(null, '删除成功'))
 })
 
