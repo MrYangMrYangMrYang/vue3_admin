@@ -100,7 +100,7 @@ router.beforeEach(async (to) => {
 
   // 已登录访问登录页 → 跳转首页（防止浏览器回退到登录页）
   if (userStore.token && to.path === '/login') {
-    return '/article/channel'
+    return false
   }
 
   // RBAC 权限检查
@@ -118,14 +118,14 @@ router.beforeEach(async (to) => {
         try {
           await userStore.getUser()
         } catch {
-          // 拉取失败（如 401），由拦截器处理跳转
+          // 拉取失败，放行让页面尝试渲染，若为 401 拦截器已清除 token
         }
       }
     }
 
     if (!permStore.hasPermission(permRequired)) {
       ElMessage.warning('您没有权限访问此页面')
-      return '/article/channel'
+      return false
     }
   }
 })
