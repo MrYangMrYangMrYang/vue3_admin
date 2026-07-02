@@ -36,9 +36,9 @@ export default defineConfig({
     }
   ],
   webServer: {
-    command: 'pnpm dev',
+    command: process.env.CI ? 'pnpm dev:mock' : 'pnpm dev',
     url: 'http://localhost:5173',
     reuseExistingServer: !process.env.CI,
-    timeout: 15000
+    timeout: 30000
   }
 })
