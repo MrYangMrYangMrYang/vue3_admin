@@ -73,6 +73,8 @@ export interface RegisterData {
   password: string
   /** 确认密码（必须与 password 一致） */
   repassword: string
+  /** 注册时选择的角色（默认 viewer） */
+  role?: string
 }
 
 /** 用户登录表单数据 */

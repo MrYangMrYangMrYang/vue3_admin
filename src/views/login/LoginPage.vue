@@ -11,10 +11,11 @@ import { getErrorMessage } from '@/utils/format'
 
 const { t } = useI18n()
 
-const formModel = ref<RegisterData & LoginData>({
+const formModel = ref<RegisterData & LoginData & { role: string }>({
   username: '',
   password: '',
-  repassword: ''
+  repassword: '',
+  role: 'viewer'
 })
 const rememberMe = ref(false)
 
@@ -275,6 +276,18 @@ const onForgotPassword = () => {
                   @focus="isTyping = true"
                   @blur="isTyping = false"
                 ></el-input>
+              </el-form-item>
+
+              <div class="fieldLabel">{{ t('login.role') }}</div>
+              <el-form-item prop="role">
+                <el-select
+                  v-model="formModel.role"
+                  :placeholder="t('login.role')"
+                  style="width: 100%"
+                >
+                  <el-option label="编辑者 — 可管理文章内容" value="editor" />
+                  <el-option label="访客 — 仅可浏览查看" value="viewer" />
+                </el-select>
               </el-form-item>
             </div>
           </transition>

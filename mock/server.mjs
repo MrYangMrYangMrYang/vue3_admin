@@ -238,9 +238,9 @@ const users = new Map([
   ['viewer', '123456']
 ])
 
-/** POST /api/reg — 注册 */
+/** POST /api/reg — 注册（支持自选角色） */
 app.post('/api/reg', (req, res) => {
-  const { username, password } = req.body
+  const { username, password, role } = req.body
   if (!username || !password) {
     return res.json({ code: 1, message: '用户名或密码不能为空', data: null })
   }
@@ -248,7 +248,11 @@ app.post('/api/reg', (req, res) => {
     return res.json({ code: 1, message: '用户名已被占用', data: null })
   }
   users.set(username, password)
-  res.json(ok(null, '注册成功'))
+  // 保存角色：仅允许 editor/viewer，非法值默认 viewer
+  const validRoles = ['editor', 'viewer']
+  const assignedRole = validRoles.includes(role) ? role : 'viewer'
+  userRoles.set(username, [assignedRole])
+  res.json(ok({ role: assignedRole }, '注册成功'))
 })
 
 /** POST /api/login — 登录 */
