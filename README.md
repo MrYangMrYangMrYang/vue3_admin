@@ -230,9 +230,9 @@ vue3-big-event-admin/
 │   │   ├── article.ts             # 文章相关接口（9个 API）
 │   │   └── user.ts                # 用户相关接口（6个 API）
 │   │
-│   ├── assets/                    # 静态资源与全局样式
-│   │   ├── *.jpg/png              # 图片资源（头像、封面、背景等）
-│   │   └── main.scss              # 全局 SCSS 样式变量
+│   ├── assets/                    # 静态图片资源
+│   │   ├── logo.png               # 应用 Logo
+│   │   └── default-avatar.png     # 默认用户头像
 │   │
 │   ├── components/                # 全局公共组件
 │   │   ├── AnimatedCharacters.vue # GSAP 动画组件（登录页角色）
@@ -264,6 +264,9 @@ vue3-big-event-admin/
 │   │       ├── __tests__/         # Store 单元测试
 │   │       │   └── user.test.ts
 │   │       └── user.ts            # 用户状态（Token + 用户信息）
+│   │
+│   ├── styles/                    # 全局样式
+│   │   └── main.scss              # 全局 SCSS 变量与基础样式
 │   │
 │   ├── types/                     # TypeScript 类型定义 ⭐
 │   │   └── index.ts               # 全局类型接口（UserInfo, ArticleDetail 等）
@@ -675,9 +678,7 @@ docs(readme): 更新部署说明文档
 - [ ] RBAC 权限控制（角色管理 + 按钮级权限）
 - [ ] Excel/PDF 数据导出
 - [ ] PWA 离线支持（Service Worker + Manifest）
-- [ ] RBAC 权限管理（角色/菜单权限）
 - [ ] 操作日志记录
-- [ ] 数据导出（Excel/PDF）
 - [ ] WebSocket 实时通知
 
 ---
