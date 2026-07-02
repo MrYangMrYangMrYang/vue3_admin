@@ -8,7 +8,7 @@ import App from './App.vue'
 import router from './router'
 import pinia from './stores'
 
-import '@/assets/main.scss'
+import '@/styles/main.scss'
 
 // Element Plus 暗色主题 CSS 变量：提供 html.dark 作用域下的组件暗色变量覆盖
 import 'element-plus/theme-chalk/dark/css-vars.css'

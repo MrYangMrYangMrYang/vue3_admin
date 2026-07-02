@@ -14,7 +14,7 @@ import {
   Moon,
   Menu
 } from '@element-plus/icons-vue'
-import avatar from '@/assets/default.png'
+import avatar from '@/assets/default-avatar.png'
 import { useUserStore } from '@/stores'
 import { onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
