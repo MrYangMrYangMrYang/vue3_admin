@@ -14,8 +14,8 @@
 
 {
   "compilerOptions": {
-    /** 编译目标版本：ES2020 支持可选链、空值合并等现代语法 */
-    "target": "ES2020",
+    /** 编译目标版本：ES2021 支持 replaceAll、可选链、空值合并等现代语法 */
+    "target": "ES2021",
 
     /** 使用 ES2020 的 defineProperty 语义处理类字段 */
     "useDefineForClassFields": true,
@@ -23,8 +23,8 @@
     /** 模块系统：ESNext 支持 tree-shaking 和动态导入 */
     "module": "ESNext",
 
-    /** 包含的类型库定义（DOM、迭代器等） */
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    /** 包含的类型库定义（ES2021 包含 replaceAll、Promise.any 等） */
+    "lib": ["ES2021", "DOM", "DOM.Iterable"],
 
     /** 跳过 .d.ts 类型声明文件的检查（提升性能） */
     "skipLibCheck": true,

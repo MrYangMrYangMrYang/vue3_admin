@@ -112,10 +112,10 @@ describe('useTable 分页列表封装', () => {
       const fetchFn = vi.fn().mockResolvedValue(customResponse)
       const { list, total, getList } = useTable(fetchFn, {
         immediate: false,
-        transform: (res: { items: unknown[]; count: number }) => ({
-          list: res.items,
-          total: res.count
-        })
+        transform: (res: unknown) => {
+          const r = res as { items: unknown[]; count: number }
+          return { list: r.items, total: r.count }
+        }
       })
 
       await getList()

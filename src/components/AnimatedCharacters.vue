@@ -47,14 +47,36 @@
 import { ref, onMounted, onUnmounted, watch, defineComponent, h } from 'vue'
 import gsap from 'gsap'
 
+/** GSAP quickTo 实例集合的类型定义 */
+interface QuickToRefs {
+  purpleSkew: gsap.QuickToFunc
+  blackSkew: gsap.QuickToFunc
+  orangeSkew: gsap.QuickToFunc
+  yellowSkew: gsap.QuickToFunc
+  purpleX: gsap.QuickToFunc
+  blackX: gsap.QuickToFunc
+  purpleHeight: gsap.QuickToFunc
+  blackHeight: gsap.QuickToFunc
+  purpleFaceLeft: gsap.QuickToFunc
+  purpleFaceTop: gsap.QuickToFunc
+  blackFaceLeft: gsap.QuickToFunc
+  blackFaceTop: gsap.QuickToFunc
+  orangeFaceX: gsap.QuickToFunc
+  orangeFaceY: gsap.QuickToFunc
+  yellowFaceX: gsap.QuickToFunc
+  yellowFaceY: gsap.QuickToFunc
+  mouthX: gsap.QuickToFunc
+  mouthY: gsap.QuickToFunc
+}
+
 /**
  * 登录页动态人物组件
  * 包含四个交互式角色（紫色、黑色、橙色、黄色），能够跟随鼠标移动并根据输入状态改变表情和动作
  *
  * Props:
- * @param {Boolean} isTyping - 是否正在输入（控制对视动画）
- * @param {Boolean} showPassword - 是否显示密码（切换偷看状态）
- * @param {Number} passwordLength - 密码长度（判断是否进入保护状态）
+ * @param isTyping - 是否正在输入（控制对视动画）
+ * @param showPassword - 是否显示密码（切换偷看状态）
+ * @param passwordLength - 密码长度（判断是否进入保护状态）
  */
 const props = defineProps({
   isTyping: Boolean,
@@ -128,29 +150,32 @@ const EyeBall = defineComponent({
   }
 })
 
-const containerRef = ref(null)
+const containerRef = ref<HTMLElement | null>(null)
 const mouse = { x: 0, y: 0 }
 let rafId = 0
 
 // 角色身体/面部 DOM 引用
-const purpleRef = ref(null)
-const blackRef = ref(null)
-const yellowRef = ref(null)
-const orangeRef = ref(null)
+const purpleRef = ref<HTMLElement | null>(null)
+const blackRef = ref<HTMLElement | null>(null)
+const yellowRef = ref<HTMLElement | null>(null)
+const orangeRef = ref<HTMLElement | null>(null)
 
-const purpleFaceRef = ref(null)
-const blackFaceRef = ref(null)
-const yellowFaceRef = ref(null)
-const orangeFaceRef = ref(null)
-const yellowMouthRef = ref(null)
+const purpleFaceRef = ref<HTMLElement | null>(null)
+const blackFaceRef = ref<HTMLElement | null>(null)
+const yellowFaceRef = ref<HTMLElement | null>(null)
+const orangeFaceRef = ref<HTMLElement | null>(null)
+const yellowMouthRef = ref<HTMLElement | null>(null)
 
 // GSAP quickTo 实例，用于高性能、低延迟的样式平滑更新
-const quickToRefs = ref(null)
-const blinkTimers = { purple: null, black: null }
-const isLooking = ref(false) // 是否正在进行“对视”动画
-let lookingTimer = null
+const quickToRefs = ref<QuickToRefs | null>(null)
+const blinkTimers: Record<string, ReturnType<typeof setTimeout> | null> = {
+  purple: null,
+  black: null
+}
+const isLooking = ref(false) // 是否正在进行”对视”动画
+let lookingTimer: ReturnType<typeof setTimeout> | null = null
 
-const onMove = (e) => {
+const onMove = (e: MouseEvent) => {
   mouse.x = e.clientX
   mouse.y = e.clientY
 }
@@ -244,7 +269,8 @@ onMounted(() => {
    * @param {HTMLElement} el - 角色 DOM 引用
    * @returns {Object} 包含面部偏移和身体倾斜角度
    */
-  const calcPos = (el) => {
+  const calcPos = (el: HTMLElement | null) => {
+    if (!el) return { faceX: 0, faceY: 0, bodySkew: 0 }
     const rect = el.getBoundingClientRect()
     const cx = rect.left + rect.width / 2
     const cy = rect.top + rect.height / 3
@@ -263,7 +289,7 @@ onMounted(() => {
    * @param {Number} maxDist - 最大偏移距离
    * @returns {Object} 包含 x 和 y 偏移量
    */
-  const calcEyePos = (el, maxDist) => {
+  const calcEyePos = (el: HTMLElement, maxDist: number) => {
     const r = el.getBoundingClientRect()
     const cx = r.left + r.width / 2
     const cy = r.top + r.height / 2
@@ -361,15 +387,17 @@ onMounted(() => {
       qt.mouthY(yp.faceY)
 
       // 更新瞳孔和眼球的实时偏移
-      const allPupils = containerRef.value.querySelectorAll('.pupil')
-      allPupils.forEach((el) => {
+      const allPupils =
+        containerRef.value!.querySelectorAll<HTMLElement>('.pupil')
+      allPupils.forEach((el: HTMLElement) => {
         const maxDist = Number(el.dataset.maxDistance) || 5
         const pos = calcEyePos(el, maxDist)
         gsap.set(el, { x: pos.x, y: pos.y })
       })
 
-      const allEyeballs = containerRef.value.querySelectorAll('.eyeball')
-      allEyeballs.forEach((el) => {
+      const allEyeballs =
+        containerRef.value!.querySelectorAll<HTMLElement>('.eyeball')
+      allEyeballs.forEach((el: HTMLElement) => {
         // 对视期间，紫色和黑色的眼球由专门的 watch 逻辑控制，不跟随鼠标
         if (
           looking &&
@@ -393,18 +421,23 @@ onMounted(() => {
   rafId = requestAnimationFrame(tick)
 
   // 眨眼逻辑
-  const scheduleBlink = (character, selector, defaultSize) => {
-    const eyeballs = character.querySelectorAll('.eyeball')
+  const scheduleBlink = (
+    character: HTMLElement | null,
+    selector: string,
+    defaultSize: number
+  ) => {
+    if (!character) return
+    const eyeballs = character.querySelectorAll<HTMLElement>('.eyeball')
     if (!eyeballs.length) return
 
     const blink = () => {
       // 缩小眼眶高度模拟闭眼
-      eyeballs.forEach((el) =>
+      eyeballs.forEach((el: HTMLElement) =>
         gsap.to(el, { height: 2, duration: 0.08, ease: 'power2.in' })
       )
       setTimeout(() => {
         // 恢复眼眶高度模拟睁眼
-        eyeballs.forEach((el) =>
+        eyeballs.forEach((el: HTMLElement) =>
           gsap.to(el, {
             height: defaultSize,
             duration: 0.08,
@@ -426,9 +459,9 @@ onUnmounted(() => {
   // 组件销毁时清除所有事件监听和定时器，防止内存泄漏
   window.removeEventListener('mousemove', onMove)
   cancelAnimationFrame(rafId)
-  clearTimeout(blinkTimers.purple)
-  clearTimeout(blinkTimers.black)
-  clearTimeout(lookingTimer)
+  if (blinkTimers.purple) clearTimeout(blinkTimers.purple)
+  if (blinkTimers.black) clearTimeout(blinkTimers.black)
+  if (lookingTimer) clearTimeout(lookingTimer)
 })
 
 // 监听对视逻辑：当用户聚焦密码框时触发一次对视动画
@@ -446,38 +479,46 @@ watch(
         qt.blackFaceTop(12)
       }
       // 瞳孔看向对方
-      purpleRef.value?.querySelectorAll('.eyeball-pupil').forEach((p) => {
-        gsap.to(p, {
-          x: 3,
-          y: 7,
-          duration: 0.3,
-          ease: 'power2.out',
-          overwrite: 'auto'
+      purpleRef
+        .value!.querySelectorAll<HTMLElement>('.eyeball-pupil')
+        .forEach((p: HTMLElement) => {
+          gsap.to(p, {
+            x: 3,
+            y: 7,
+            duration: 0.3,
+            ease: 'power2.out',
+            overwrite: 'auto'
+          })
         })
-      })
-      blackRef.value?.querySelectorAll('.eyeball-pupil').forEach((p) => {
-        gsap.to(p, {
-          x: 0,
-          y: -4,
-          duration: 0.3,
-          ease: 'power2.out',
-          overwrite: 'auto'
+      blackRef
+        .value!.querySelectorAll<HTMLElement>('.eyeball-pupil')
+        .forEach((p: HTMLElement) => {
+          gsap.to(p, {
+            x: 0,
+            y: -4,
+            duration: 0.3,
+            ease: 'power2.out',
+            overwrite: 'auto'
+          })
         })
-      })
 
-      clearTimeout(lookingTimer)
+      if (lookingTimer) clearTimeout(lookingTimer)
       // 1秒后结束对视动画，恢复自由跟随
       lookingTimer = setTimeout(() => {
         isLooking.value = false
-        purpleRef.value?.querySelectorAll('.eyeball-pupil').forEach((p) => {
-          gsap.killTweensOf(p)
-        })
-        blackRef.value?.querySelectorAll('.eyeball-pupil').forEach((p) => {
-          gsap.killTweensOf(p)
-        })
+        purpleRef
+          .value!.querySelectorAll<HTMLElement>('.eyeball-pupil')
+          .forEach((p: HTMLElement) => {
+            gsap.killTweensOf(p)
+          })
+        blackRef
+          .value!.querySelectorAll<HTMLElement>('.eyeball-pupil')
+          .forEach((p: HTMLElement) => {
+            gsap.killTweensOf(p)
+          })
       }, 1000)
     } else {
-      clearTimeout(lookingTimer)
+      if (lookingTimer) clearTimeout(lookingTimer)
       isLooking.value = false
     }
   }
@@ -512,10 +553,10 @@ watch(
       qt.mouthY(0)
 
       // 瞳孔看向一侧
-      const pupils = containerRef.value.querySelectorAll(
+      const pupils = containerRef.value!.querySelectorAll<HTMLElement>(
         '.eyeball-pupil, .pupil'
       )
-      pupils.forEach((p) => {
+      pupils.forEach((p: HTMLElement) => {
         gsap.to(p, {
           x: -4,
           y: -4,
