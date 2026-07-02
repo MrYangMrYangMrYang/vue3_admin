@@ -105,6 +105,16 @@ router.beforeEach(async (to) => {
 
   // RBAC 权限检查
   const permRequired = to.meta.permission as string | undefined
+
+  if (import.meta.env.DEV)
+    console.log(
+      '[守卫]',
+      to.path,
+      'perm:',
+      permRequired,
+      'token:',
+      !!userStore.token
+    )
   if (permRequired) {
     const permStore = usePermissionStore()
 
@@ -123,6 +133,13 @@ router.beforeEach(async (to) => {
       }
     }
 
+    if (import.meta.env.DEV)
+      console.log(
+        '[守卫] perms:',
+        permStore.permissions,
+        ' has:',
+        permStore.hasPermission(permRequired)
+      )
     if (!permStore.hasPermission(permRequired)) {
       ElMessage.warning('您没有权限访问此页面')
       return false
