@@ -87,7 +87,7 @@ const router = createRouter({
 })
 
 // 全局前置守卫
-router.beforeEach((to) => {
+router.beforeEach(async (to) => {
   // 路由切换时取消上一个页面未完成的 GET 请求
   cancelAllPending()
 
@@ -107,10 +107,22 @@ router.beforeEach((to) => {
   const permRequired = to.meta.permission as string | undefined
   if (permRequired) {
     const permStore = usePermissionStore()
-    // 首次加载时权限可能尚未加载，尝试从持久化的 user 数据恢复
-    if (!permStore.permissions.length && userStore.user?.permissions?.length) {
-      permStore.setPermissions(userStore.user.permissions)
+
+    // 权限尚未加载（如刚登录后），主动拉取用户信息
+    if (!permStore.permissions.length) {
+      if (userStore.user?.permissions?.length) {
+        // 从持久化的 user 数据快速恢复（刷新页面场景）
+        permStore.setPermissions(userStore.user.permissions)
+      } else if (userStore.token) {
+        // token 存在但用户信息未加载（登录后场景），等待拉取
+        try {
+          await userStore.getUser()
+        } catch {
+          // 拉取失败（如 401），由拦截器处理跳转
+        }
+      }
     }
+
     if (!permStore.hasPermission(permRequired)) {
       ElMessage.warning('您没有权限访问此页面')
       return '/article/channel'
